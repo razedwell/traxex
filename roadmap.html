@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Go Messaging App — Dev Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0a0c10;
+  --bg1:      #0f1218;
+  --bg2:      #141820;
+  --bg3:      #1c2230;
+  --border:   #1e2840;
+  --border2:  #2a3655;
+  --text:     #c8d4e8;
+  --text2:    #7a8aaa;
+  --text3:    #4a5a7a;
+  --accent:   #3b82f6;
+  --accent2:  #60a5fa;
+  --green:    #34d399;
+  --amber:    #fbbf24;
+  --coral:    #f87171;
+  --purple:   #a78bfa;
+  --teal:     #2dd4bf;
+  --mono:     'JetBrains Mono', monospace;
+  --display:  'Syne', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* noise overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── HEADER ─── */
+header {
+  padding: 56px 0 48px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 48px;
+}
+
+.header-tag {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-tag::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: var(--accent);
+}
+
+h1 {
+  font-family: var(--display);
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 800;
+  line-height: 1.1;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+
+h1 span { color: var(--accent2); }
+
+.header-meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 400;
+}
+.pill .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+}
+.pill .dot.amber { background: var(--amber); }
+.pill .dot.coral { background: var(--coral); }
+
+/* ─── PROGRESS BAR ─── */
+.progress-bar-wrap {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin-bottom: 48px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.progress-label { font-size: 11px; color: var(--text2); white-space: nowrap; }
+.progress-track {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--teal) 100%);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.6s ease;
+}
+.progress-count {
+  font-size: 11px;
+  color: var(--accent2);
+  white-space: nowrap;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* ─── SECTION HEADERS ─── */
+.section-header {
+  font-family: var(--display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 16px;
+  margin-top: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-header::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ─── ARCHITECTURE PANEL ─── */
+.arch-panel {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.arch-toggle {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  text-align: left;
+  transition: background 0.15s;
+}
+.arch-toggle:hover { background: var(--bg2); }
+.arch-toggle .chevron {
+  margin-left: auto;
+  color: var(--text3);
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+.arch-toggle.open .chevron { transform: rotate(90deg); }
+.arch-body {
+  display: none;
+  padding: 0 20px 20px;
+  border-top: 1px solid var(--border);
+}
+.arch-body.open { display: block; }
+
+.arch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.arch-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.arch-card:hover {
+  border-color: var(--border2);
+  background: var(--bg3);
+}
+.arch-card-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.arch-card-title {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.arch-card-desc {
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+.arch-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 10px;
+}
+.tag {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid;
+  font-weight: 400;
+}
+.tag.blue   { color: #93c5fd; border-color: #1d4ed8; background: #1e3a5f22; }
+.tag.green  { color: #6ee7b7; border-color: #065f46; background: #06402022; }
+.tag.amber  { color: #fcd34d; border-color: #92400e; background: #45200422; }
+.tag.purple { color: #c4b5fd; border-color: #5b21b6; background: #3b197022; }
+.tag.coral  { color: #fca5a5; border-color: #991b1b; background: #5f0f0f22; }
+.tag.teal   { color: #5eead4; border-color: #134e4a; background: #0d302e22; }
+.tag.gray   { color: #9ca3af; border-color: #374151; background: #1f2a3622; }
+
+/* ─── PHASES ─── */
+.phases { display: flex; flex-direction: column; gap: 10px; }
+
+.phase {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.phase:hover { border-color: var(--border2); }
+.phase.active { border-color: var(--accent); }
+.phase.done { border-color: var(--border); opacity: 0.7; }
+
+.phase-header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  cursor: pointer;
+  padding: 0;
+  user-select: none;
+}
+
+.phase-number {
+  width: 52px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 800;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+  color: var(--text3);
+  transition: color 0.15s;
+}
+.phase:hover .phase-number,
+.phase.active .phase-number { color: var(--accent2); }
+
+.phase-header-content {
+  flex: 1;
+  padding: 16px 18px;
+}
+
+.phase-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.phase-name {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.phase-badge {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+.phase-badge.foundation { color: var(--teal); border-color: #0d9488; background: #0d302e22; }
+.phase-badge.service    { color: var(--accent2); border-color: #1d4ed8; background: #1e3a5f22; }
+.phase-badge.events     { color: var(--amber); border-color: #92400e; background: #45200422; }
+.phase-badge.concurrency{ color: var(--purple); border-color: #5b21b6; background: #3b197022; }
+.phase-badge.observability { color: var(--green); border-color: #065f46; background: #06402022; }
+.phase-badge.infra      { color: var(--coral); border-color: #991b1b; background: #5f0f0f22; }
+
+.phase-subtitle {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+.phase-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+  padding-right: 18px;
+  flex-shrink: 0;
+}
+.phase-progress-mini {
+  font-size: 10px;
+  color: var(--text3);
+  white-space: nowrap;
+}
+.phase-chevron {
+  color: var(--text3);
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+.phase.open .phase-chevron { transform: rotate(90deg); }
+
+.phase-body {
+  display: none;
+  border-top: 1px solid var(--border);
+}
+.phase.open .phase-body { display: block; }
+
+/* ─── STEPS ─── */
+.steps { padding: 8px 0; }
+
+.step {
+  display: flex;
+  gap: 0;
+  padding: 0 18px 0 52px;
+  min-height: 44px;
+  align-items: stretch;
+  cursor: pointer;
+  transition: background 0.1s;
+  position: relative;
+}
+.step:hover { background: var(--bg2); }
+.step.done-step { opacity: 0.55; }
+
+.step-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1.5px solid var(--border2);
+  flex-shrink: 0;
+  margin-right: 12px;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+  background: transparent;
+}
+.step.done-step .step-check {
+  background: var(--green);
+  border-color: var(--green);
+}
+.step.done-step .step-check::after {
+  content: '✓';
+  font-size: 9px;
+  color: #0a0c10;
+  font-weight: 700;
+}
+
+.step-content {
+  flex: 1;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.step:last-child .step-content { border-bottom: none; }
+
+.step-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.step.done-step .step-title { text-decoration: line-through; color: var(--text2); }
+
+.step-desc {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 3px;
+  line-height: 1.5;
+}
+
+.step-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+/* ─── CODE BLOCKS ─── */
+.code-ref {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 10px;
+  color: var(--teal);
+  font-family: var(--mono);
+}
+
+/* ─── NOTES PANEL ─── */
+.note {
+  background: var(--bg2);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  padding: 12px 16px;
+  margin: 12px 18px 4px;
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+.note.warn { border-left-color: var(--amber); }
+.note.ok   { border-left-color: var(--green); }
+.note strong { color: var(--text); }
+
+/* ─── TECH MAP ─── */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+.tech-item {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tech-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+}
+.tech-role {
+  font-size: 10px;
+  color: var(--text2);
+}
+
+/* ─── DIR TREE ─── */
+.dir-tree {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 18px 22px;
+  font-size: 12px;
+  font-family: var(--mono);
+  line-height: 1.65;
+  color: var(--text2);
+  white-space: pre;
+  overflow-x: auto;
+  margin: 12px 18px 4px;
+}
+.dir-tree .dir  { color: var(--accent2); }
+.dir-tree .file { color: var(--text2); }
+.dir-tree .comment { color: var(--text3); }
+
+/* ─── STICKY NAV ─── */
+.sidenav {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 100;
+}
+.sidenav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border2);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  position: relative;
+}
+.sidenav-dot:hover,
+.sidenav-dot.active {
+  background: var(--accent);
+  transform: scale(1.4);
+}
+.sidenav-dot .sidenav-tip {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 10px;
+  white-space: nowrap;
+  color: var(--text);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.sidenav-dot:hover .sidenav-tip { opacity: 1; }
+
+@media (max-width: 768px) { .sidenav { display: none; } }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.phase { animation: fadeUp 0.4s ease both; }
+.phase:nth-child(1) { animation-delay: 0.05s; }
+.phase:nth-child(2) { animation-delay: 0.10s; }
+.phase:nth-child(3) { animation-delay: 0.15s; }
+.phase:nth-child(4) { animation-delay: 0.20s; }
+.phase:nth-child(5) { animation-delay: 0.25s; }
+.phase:nth-child(6) { animation-delay: 0.30s; }
+</style>
+</head>
+<body>
+
+<nav class="sidenav" id="sidenav"></nav>
+
+<div class="wrap">
+
+<!-- HEADER -->
+<header>
+  <div class="header-tag">Go backend — learning project</div>
+  <h1>Messaging App<br><span>Dev Roadmap</span></h1>
+  <p style="color:var(--text2); font-size:12px; max-width:560px; line-height:1.7;">
+    Monorepo · mono module · microservices with gRPC · Kafka · Redis · PostgreSQL · Docker · OpenTelemetry. 
+    Click any phase to expand. Check off steps as you go.
+  </p>
+  <div class="header-meta">
+    <span class="pill"><span class="dot"></span> 6 phases</span>
+    <span class="pill"><span class="dot amber"></span> 4 services</span>
+    <span class="pill"><span class="dot coral"></span> 40+ steps</span>
+  </div>
+</header>
+
+<!-- PROGRESS -->
+<div class="progress-bar-wrap">
+  <span class="progress-label">// overall progress</span>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <span class="progress-count" id="progressCount">0 / 0</span>
+</div>
+
+<!-- ARCHITECTURE OVERVIEW -->
+<div class="section-header" id="sec-arch">architecture overview</div>
+
+<div class="arch-panel">
+  <button class="arch-toggle" onclick="toggleArch(this)">
+    <span style="color:var(--text3); font-size:11px;">▸</span>
+    <span style="color:var(--text2);">// service map —</span>
+    <span style="color:var(--text); margin-left:4px;">what you're building and how it connects</span>
+    <span class="chevron">▶</span>
+  </button>
+  <div class="arch-body">
+    <div class="note ok"><strong>Read this first.</strong> Understand the full picture before writing any code. Every service is in <code>services/</code>, every shared package in <code>shared/</code>. gRPC for sync calls, Kafka for async fanout.</div>
+    <div class="arch-grid">
+      <div class="arch-card">
+        <div class="arch-card-label" style="color:var(--purple)">entry point</div>
+        <div class="arch-card-title">API gateway</div>
+        <div class="arch-card-desc">REST via oapi-codegen. Auth middleware. Rate limiting via Redis. Routes to gRPC services.</div>
+        <div class="arch-card-tags">
+          <span class="tag purple">oapi-codegen</span>
+          <span class="tag gray">HTTP/gRPC</span>
+        </div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-label" style="color:var(--teal)">service 1</div>
+        <div class="arch-card-title">auth</div>
+        <div class="arch-card-desc">Registration, login, JWT issuance, token refresh. Sessions stored in Redis.</div>
+        <div class="arch-card-tags">
+          <span class="tag teal">JWT</span>
+          <span class="tag green">Redis</span>
+          <span class="tag blue">PostgreSQL</span>
+        </div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-label" style="color:var(--teal)">service 2</div>
+        <div class="arch-card-title">messaging</div>
+        <div class="arch-card-desc">Send/receive, conversation history, read receipts. Publishes <code>message.sent</code> to Kafka.</div>
+        <div class="arch-card-tags">
+          <span class="tag amber">Kafka producer</span>
+          <span class="tag blue">PostgreSQL</span>
+        </div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-label" style="color:var(--teal)">service 3</div>
+        <div class="arch-card-title">presence</div>
+        <div class="arch-card-desc">Online/offline state. WebSocket hub. Redis pub/sub for cross-instance broadcast.</div>
+        <div class="arch-card-tags">
+          <span class="tag green">Redis pub/sub</span>
+          <span class="tag purple">goroutines</span>
+          <span class="tag gray">WebSocket</span>
+        </div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-label" style="color:var(--teal)">service 4</div>
+        <div class="arch-card-title">notification</div>
+        <div class="arch-card-desc">Kafka consumer. Worker pool dispatches push notifications. Dead-letter handling.</div>
+        <div class="arch-card-tags">
+          <span class="tag amber">Kafka consumer</span>
+          <span class="tag purple">worker pool</span>
+        </div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-label" style="color:var(--amber)">event bus</div>
+        <div class="arch-card-title">Kafka</div>
+        <div class="arch-card-desc">Topics: <code>message.sent</code> · <code>user.presence</code> · <code>notification.push</code>. Async fanout between services.</div>
+        <div class="arch-card-tags">
+          <span class="tag amber">async</span>
+          <span class="tag amber">event-driven</span>
+        </div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-label" style="color:var(--blue, #3b82f6)">persistence</div>
+        <div class="arch-card-title">PostgreSQL</div>
+        <div class="arch-card-desc">Users, messages, rooms, read receipts. pgx/v5 with connection pooling. Migrations via goose.</div>
+        <div class="arch-card-tags">
+          <span class="tag blue">pgx/v5</span>
+          <span class="tag blue">goose</span>
+        </div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-label" style="color:var(--green)">cache + realtime</div>
+        <div class="arch-card-title">Redis</div>
+        <div class="arch-card-desc">Sessions, rate limiting, pub/sub for presence. Not just a cache — a coordination layer.</div>
+        <div class="arch-card-tags">
+          <span class="tag green">sessions</span>
+          <span class="tag green">pub/sub</span>
+          <span class="tag green">rate limit</span>
+        </div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-label" style="color:var(--coral)">observability</div>
+        <div class="arch-card-title">OTel + Grafana + ELK</div>
+        <div class="arch-card-desc">Traces span across gRPC calls and Kafka. Metrics → Grafana. Structured logs → Elasticsearch.</div>
+        <div class="arch-card-tags">
+          <span class="tag coral">traces</span>
+          <span class="tag coral">metrics</span>
+          <span class="tag coral">logs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="arch-panel" style="margin-top:8px;">
+  <button class="arch-toggle" onclick="toggleArch(this)">
+    <span style="color:var(--text3); font-size:11px;">▸</span>
+    <span style="color:var(--text2);">// directory layout —</span>
+    <span style="color:var(--text); margin-left:4px;">target structure once fully scaffolded</span>
+    <span class="chevron">▶</span>
+  </button>
+  <div class="arch-body">
+    <div class="dir-tree">
+<span class="dir">.</span>  <span class="comment"># repo root (mono module)</span>
+├── <span class="file">go.mod</span>  <span class="comment"># github.com/you/chat</span>
+├── <span class="file">Makefile</span>  <span class="comment"># build · proto · test · docker</span>
+├── <span class="dir">proto/</span>
+│   ├── <span class="dir">auth/v1/</span>
+│   │   └── <span class="file">auth.proto</span>
+│   ├── <span class="dir">messaging/v1/</span>
+│   └── <span class="dir">presence/v1/</span>
+├── <span class="dir">services/</span>
+│   ├── <span class="dir">auth/</span>
+│   │   ├── <span class="dir">cmd/server/</span><span class="file">main.go</span>
+│   │   ├── <span class="file">Dockerfile</span>
+│   │   ├── <span class="file">openapi.yaml</span>  <span class="comment"># → oapi-codegen</span>
+│   │   └── <span class="dir">internal/</span>
+│   │       ├── <span class="dir">handler/</span>  <span class="comment"># gRPC + HTTP handlers</span>
+│   │       ├── <span class="dir">service/</span>  <span class="comment"># business logic (interface)</span>
+│   │       ├── <span class="dir">repository/</span>  <span class="comment"># DB queries (interface)</span>
+│   │       ├── <span class="dir">domain/</span>  <span class="comment"># types, errors</span>
+│   │       └── <span class="dir">mocks/</span>  <span class="comment"># mockery generated</span>
+│   ├── <span class="dir">messaging/</span>  <span class="comment"># same layout</span>
+│   ├── <span class="dir">presence/</span>
+│   └── <span class="dir">notification/</span>
+├── <span class="dir">shared/</span>
+│   ├── <span class="dir">config/</span>  <span class="comment"># viper loader</span>
+│   ├── <span class="dir">errors/</span>  <span class="comment"># typed errors</span>
+│   ├── <span class="dir">observability/</span>  <span class="comment"># OTel + zap setup</span>
+│   ├── <span class="dir">postgres/</span>  <span class="comment"># pgx pool factory</span>
+│   ├── <span class="dir">redis/</span>  <span class="comment"># client factory</span>
+│   └── <span class="dir">kafka/</span>  <span class="comment"># producer/consumer helpers</span>
+├── <span class="dir">deployments/</span>
+│   ├── <span class="file">docker-compose.yml</span>
+│   └── <span class="dir">grafana/</span>
+└── <span class="dir">docs/</span>
+    </div>
+  </div>
+</div>
+
+<!-- PHASES -->
+<div class="section-header" id="sec-phases">build phases</div>
+<div class="phases" id="phases"></div>
+
+<!-- TECH REF -->
+<div class="section-header" id="sec-tech">tech reference</div>
+<div class="tech-grid" id="techGrid"></div>
+
+</div><!-- /wrap -->
+
+<script>
+const PHASES = [
+  {
+    id: 'p1',
+    number: '01',
+    name: 'Repo & Shared Foundations',
+    badge: 'foundation',
+    subtitle: 'Makefile · shared/ packages · module setup — everything else depends on this',
+    steps: [
+      {
+        title: 'Write the Makefile',
+        desc: 'Targets: proto, generate, build, test, lint, docker-up, docker-down, migrate. This is your developer CLI for the whole project.',
+        tags: [['gray','Makefile']],
+        note: 'Start simple — 6-8 targets. You will add more. The key ones are `make proto` and `make generate` which you will run constantly.'
+      },
+      {
+        title: 'Set up docker-compose.yml',
+        desc: 'Services: postgres, redis, kafka (+ zookeeper or KRaft), elasticsearch, kibana, grafana. Expose ports for local dev.',
+        tags: [['gray','Docker']],
+        code: 'deployments/docker-compose.yml'
+      },
+      {
+        title: 'shared/config — viper-based loader',
+        desc: 'Generic config struct loaded from env vars + YAML. Each service will call this with its own struct. Use mapstructure tags.',
+        tags: [['teal','shared/config'],['gray','viper']],
+        code: 'shared/config/config.go'
+      },
+      {
+        title: 'shared/errors — typed error package',
+        desc: 'Define AppError with a Code (NOT_FOUND, UNAUTHORIZED, etc.), message, and optional cause. Implement error interface. Add gRPC status mapping.',
+        tags: [['teal','shared/errors']],
+        note: 'This is foundational. Every service returns these types. The gRPC handler layer converts them to status codes.'
+      },
+      {
+        title: 'shared/postgres — pgx pool factory',
+        desc: 'NewPool(cfg) returns *pgxpool.Pool. Connection string builder. Health check function. Wrap pgx/v5.',
+        tags: [['blue','pgx/v5'],['teal','shared/postgres']],
+        code: 'shared/postgres/postgres.go'
+      },
+      {
+        title: 'shared/redis — client factory',
+        desc: 'NewClient(cfg) returns *redis.Client (go-redis/v9). Config for address, password, DB number, pool size.',
+        tags: [['green','go-redis/v9'],['teal','shared/redis']],
+        code: 'shared/redis/redis.go'
+      },
+      {
+        title: 'shared/observability — OTel + zap setup',
+        desc: 'InitTracer() → TracerProvider. InitLogger() → *zap.Logger. Helper to inject trace ID into log fields. Export OTLP to Grafana Agent.',
+        tags: [['coral','OpenTelemetry'],['coral','zap']],
+        code: 'shared/observability/',
+        note: 'Wire this early. You want traces from the first service, not retrofitted later.'
+      },
+      {
+        title: 'shared/kafka — producer/consumer helpers',
+        desc: 'Thin wrapper over segmentio/kafka-go or confluent. NewProducer(cfg), NewConsumer(cfg, topic, groupID). Handles context cancellation and retry.',
+        tags: [['amber','Kafka'],['teal','shared/kafka']],
+        code: 'shared/kafka/'
+      }
+    ]
+  },
+  {
+    id: 'p2',
+    number: '02',
+    name: 'Auth Service',
+    badge: 'service',
+    subtitle: 'First full service — gRPC + REST + JWT + Redis sessions + DB',
+    steps: [
+      {
+        title: 'Write proto/auth/v1/auth.proto',
+        desc: 'RPCs: Register, Login, Logout, RefreshToken, ValidateToken. Define request/response messages. Use google.protobuf.Timestamp for created_at.',
+        tags: [['purple','protobuf']],
+        code: 'proto/auth/v1/auth.proto',
+        note: 'Make ValidateToken unary and fast — every other service calls it to auth incoming requests. It hits Redis, not Postgres.'
+      },
+      {
+        title: 'Run `make proto` → generate Go stubs',
+        desc: 'protoc with protoc-gen-go and protoc-gen-go-grpc. Output to services/auth/internal/pb/ (or a shared pb/ dir). Confirm generated files compile.',
+        tags: [['purple','protoc'],['gray','make proto']]
+      },
+      {
+        title: 'Write openapi.yaml for REST layer',
+        desc: 'Endpoints: POST /auth/register, POST /auth/login, POST /auth/logout, POST /auth/refresh. Run oapi-codegen to generate server interface and types.',
+        tags: [['purple','oapi-codegen']],
+        code: 'services/auth/openapi.yaml'
+      },
+      {
+        title: 'domain/ — User type and auth errors',
+        desc: 'type User struct with ID, Email, PasswordHash, CreatedAt. Auth-specific error codes: ErrEmailTaken, ErrInvalidCredentials, ErrTokenExpired.',
+        tags: [['gray','domain']],
+        code: 'services/auth/internal/domain/'
+      },
+      {
+        title: 'repository/ — UserRepository interface + pgx impl',
+        desc: 'Interface: CreateUser, GetByEmail, GetByID. Implement with pgx, named queries, context propagation. Write DB migration for users table.',
+        tags: [['blue','PostgreSQL'],['gray','repository']],
+        note: 'Define the interface first. The service layer depends on it, not the implementation. This is what mockery will mock for tests.'
+      },
+      {
+        title: 'Write DB migration for users table',
+        desc: 'goose migration: users(id uuid, email text unique, password_hash text, created_at timestamptz). Run via `make migrate`.',
+        tags: [['blue','goose'],['blue','PostgreSQL']],
+        code: 'services/auth/migrations/001_create_users.sql'
+      },
+      {
+        title: 'service/ — AuthService interface + implementation',
+        desc: 'Register (hash password with bcrypt, create user), Login (verify hash, issue JWT, store session in Redis), ValidateToken (check Redis, parse JWT).',
+        tags: [['gray','service'],['green','JWT'],['green','bcrypt']],
+        note: 'Hash cost for bcrypt: 12 in production, 4 in tests (speed). Store session as Redis hash with TTL = refresh token lifetime.'
+      },
+      {
+        title: 'handler/ — gRPC handler wiring',
+        desc: 'Implement the generated AuthServiceServer interface. Each handler calls the service, maps AppError → gRPC status codes. Inject OTel span.',
+        tags: [['purple','gRPC'],['gray','handler']]
+      },
+      {
+        title: 'handler/ — HTTP handler wiring (oapi-codegen)',
+        desc: 'Implement the generated ServerInterface. Thin adapter: decode request → call service → encode response. Reuse same service layer.',
+        tags: [['gray','HTTP'],['purple','oapi-codegen']]
+      },
+      {
+        title: 'Generate mocks with mockery',
+        desc: 'Mock UserRepository and AuthService interfaces. Run `make generate`. Write unit tests for service layer using mocks — no real DB needed.',
+        tags: [['gray','mockery'],['gray','testing']],
+        note: 'Test the service layer thoroughly. This is pure logic: register with duplicate email should return ErrEmailTaken, etc.'
+      },
+      {
+        title: 'cmd/server/main.go — wire everything up',
+        desc: 'Init config, postgres pool, redis client, logger, tracer. Construct repo → service → handler. Start gRPC server + HTTP server concurrently.',
+        tags: [['gray','main.go']]
+      },
+      {
+        title: 'Dockerfile for auth service',
+        desc: 'Multi-stage: builder (go build), final (scratch or distroless). COPY binary only. ENV for config. EXPOSE gRPC and HTTP ports.',
+        tags: [['gray','Docker']],
+        code: 'services/auth/Dockerfile'
+      }
+    ]
+  },
+  {
+    id: 'p3',
+    number: '03',
+    name: 'Messaging Service + Kafka',
+    badge: 'events',
+    subtitle: 'Core domain service — send/receive messages, Kafka fanout, pgx storage',
+    steps: [
+      {
+        title: 'proto/messaging/v1/messaging.proto',
+        desc: 'RPCs: SendMessage, GetHistory (server-side streaming), MarkRead. Messages: SendMessageRequest, Message (id, sender_id, room_id, content, created_at).',
+        tags: [['purple','protobuf']],
+        note: 'GetHistory can use server-side streaming — good first exposure to streaming RPCs. Client opens stream, server sends N messages.'
+      },
+      {
+        title: 'DB migrations — messages + rooms tables',
+        desc: 'rooms(id, name, created_at), room_members(room_id, user_id), messages(id, room_id, sender_id, content, created_at). Index on (room_id, created_at DESC).',
+        tags: [['blue','PostgreSQL'],['blue','goose']],
+        note: 'The (room_id, created_at DESC) index is critical. GetHistory queries will hammer this without it.'
+      },
+      {
+        title: 'repository/ — MessageRepository with pgx',
+        desc: 'InsertMessage, GetMessagesByRoom (with cursor pagination), MarkRead. Use pgx named args. Define interface first for testability.',
+        tags: [['blue','pgx/v5'],['gray','repository']]
+      },
+      {
+        title: 'Kafka topics setup in docker-compose',
+        desc: 'Create topics: message.sent, user.presence, notification.push. Set appropriate partition count (3) and retention. Add topic creation to `make docker-up`.',
+        tags: [['amber','Kafka']]
+      },
+      {
+        title: 'service/ — MessageService with Kafka producer',
+        desc: 'SendMessage: insert to DB, then publish message.sent event to Kafka. Event payload: JSON with message ID, room ID, sender, timestamp.',
+        tags: [['gray','service'],['amber','Kafka producer']],
+        note: 'Publish after DB insert, not before. If the DB write fails, nothing goes to Kafka. Eventual consistency is acceptable here — it\'s a messaging app.'
+      },
+      {
+        title: 'handler/ — gRPC + streaming handler',
+        desc: 'Implement SendMessage as unary. Implement GetHistory as ServerStream — loop over rows, call stream.Send() for each. Handle context cancellation.',
+        tags: [['purple','gRPC streaming']]
+      },
+      {
+        title: 'Unit tests with mockery mocks',
+        desc: 'Test service layer: SendMessage publishes event, GetHistory returns paginated results. Mock both repository and Kafka producer.',
+        tags: [['gray','mockery'],['gray','testing']]
+      },
+      {
+        title: 'Wire into docker-compose, test end-to-end',
+        desc: 'Add messaging service to docker-compose. Boot all deps. Use grpcurl or a small Go test client to send a message and verify it appears in history.',
+        tags: [['gray','Docker'],['gray','integration test']]
+      }
+    ]
+  },
+  {
+    id: 'p4',
+    number: '04',
+    name: 'Presence Service + Concurrency',
+    badge: 'concurrency',
+    subtitle: 'WebSocket hub pattern — goroutines, channels, Redis pub/sub',
+    steps: [
+      {
+        title: 'Design the hub pattern',
+        desc: 'Hub struct holds: clients map[*Client]bool, register chan *Client, unregister chan *Client, broadcast chan []byte. One goroutine runs the hub loop. One goroutine per client.',
+        tags: [['purple','goroutines'],['purple','channels']],
+        note: 'This is the core Go concurrency exercise. The hub\'s single goroutine owns the clients map — no mutex needed. Channels are the synchronization mechanism.'
+      },
+      {
+        title: 'Client struct — connection lifecycle',
+        desc: 'Client holds: hub ref, conn *websocket.Conn, send chan []byte. readPump goroutine reads from WebSocket. writePump goroutine drains send channel.',
+        tags: [['purple','goroutines'],['gray','WebSocket']],
+        note: 'readPump and writePump run as separate goroutines per client. On disconnect, readPump sends to hub.unregister. Use defer to ensure cleanup.'
+      },
+      {
+        title: 'Redis pub/sub for cross-instance broadcast',
+        desc: 'On message.sent event: hub publishes to Redis channel presence:{room_id}. Each presence service instance subscribes. This scales to multiple instances.',
+        tags: [['green','Redis pub/sub'],['purple','goroutines']],
+        note: 'This is where Redis goes beyond caching. Without this, two users on different server instances can\'t receive each other\'s messages via WebSocket.'
+      },
+      {
+        title: 'proto/presence/v1/presence.proto',
+        desc: 'RPCs: SetPresence, GetPresence, WatchPresence (bidirectional streaming). Used by gateway to check online status before sending push notifications.',
+        tags: [['purple','protobuf'],['purple','gRPC bidi stream']]
+      },
+      {
+        title: 'Graceful shutdown with context propagation',
+        desc: 'On SIGTERM: cancel context → hub stops accepting new connections → existing clients drain their send channels → close connections → exit.',
+        tags: [['purple','context'],['gray','shutdown']],
+        note: 'Use signal.NotifyContext. This is essential for Kubernetes — pods get SIGTERM before SIGKILL. You have ~30s to drain.'
+      },
+      {
+        title: 'Worker pool pattern in notification fanout',
+        desc: 'Fixed-size pool of N goroutines. Input channel feeds work items. Each worker processes independently. Use sync.WaitGroup for shutdown. Semaphore for backpressure.',
+        tags: [['purple','worker pool'],['purple','sync.WaitGroup']],
+        code: 'shared/worker/pool.go',
+        note: 'Build this as a generic pool in shared/worker/. N defaults to runtime.NumCPU(). This is reused in the notification service.'
+      },
+      {
+        title: 'Race detector — run tests with -race',
+        desc: 'go test -race ./.... Fix any races found. Common culprits: shared maps without mutex, closing a channel twice. The hub pattern should have zero races.',
+        tags: [['gray','-race'],['gray','testing']]
+      }
+    ]
+  },
+  {
+    id: 'p5',
+    number: '05',
+    name: 'Notification Service',
+    badge: 'concurrency',
+    subtitle: 'Kafka consumer · worker pool · dead-letter · retry logic',
+    steps: [
+      {
+        title: 'Kafka consumer setup with consumer group',
+        desc: 'Group ID: notification-service. Subscribe to message.sent and notification.push. Use shared/kafka consumer helper. Commit offsets after successful processing.',
+        tags: [['amber','Kafka consumer'],['amber','consumer group']],
+        note: 'Commit offsets manually, not auto-commit. If processing fails, you want to re-process — not silently skip. This is the difference between at-least-once and at-most-once.'
+      },
+      {
+        title: 'Wire worker pool for dispatch',
+        desc: 'Consumer reads messages → sends to work channel → pool of N workers dispatch notifications. Pool size configurable. Channel buffer = 2× pool size.',
+        tags: [['purple','worker pool'],['amber','Kafka']]
+      },
+      {
+        title: 'Retry logic with exponential backoff',
+        desc: 'Failed dispatch: retry up to 3 times with exponential backoff. After max retries, publish to dead-letter topic notification.dlq. Log with trace ID.',
+        tags: [['amber','retry'],['amber','dead-letter']]
+      },
+      {
+        title: 'Dead-letter queue consumer (separate process)',
+        desc: 'Reads from notification.dlq. Alerts (log ERROR + metric). Optional: expose HTTP endpoint to replay DLQ messages for ops.',
+        tags: [['amber','DLQ']]
+      },
+      {
+        title: 'Backpressure — block producer when pool is saturated',
+        desc: 'If work channel is full, block the Kafka consumer (stop polling). This prevents unbounded memory growth. Monitor channel depth as a Prometheus metric.',
+        tags: [['purple','backpressure'],['coral','metrics']],
+        note: 'This is the correct approach. Dropping messages or panicking is wrong. Kafka retains the messages — the consumer just falls behind temporarily.'
+      }
+    ]
+  },
+  {
+    id: 'p6',
+    number: '06',
+    name: 'Observability + Infra',
+    badge: 'observability',
+    subtitle: 'OTel traces · Prometheus metrics · Grafana dashboards · ELK logs',
+    steps: [
+      {
+        title: 'OpenTelemetry — trace gRPC calls',
+        desc: 'Add otelgrpc interceptors (UnaryServerInterceptor, UnaryClientInterceptor). Traces automatically span across service boundaries via metadata propagation.',
+        tags: [['coral','OpenTelemetry'],['purple','gRPC']]
+      },
+      {
+        title: 'OpenTelemetry — trace Kafka produce/consume',
+        desc: 'Manually create spans around Produce() and Consume(). Inject/extract trace context in Kafka message headers. Links show producer → consumer relationship.',
+        tags: [['coral','OpenTelemetry'],['amber','Kafka']]
+      },
+      {
+        title: 'OpenTelemetry — trace DB queries',
+        desc: 'pgx has OTel support via otelpgx. Wrap pool creation. Queries appear as child spans of the service handler span.',
+        tags: [['coral','OpenTelemetry'],['blue','pgx/v5']]
+      },
+      {
+        title: 'Prometheus metrics — instrument key operations',
+        desc: 'Counters: messages_sent_total, auth_failures_total. Histograms: grpc_request_duration_seconds, db_query_duration_seconds. Expose /metrics on each service.',
+        tags: [['coral','Prometheus'],['coral','metrics']]
+      },
+      {
+        title: 'Grafana dashboards',
+        desc: 'Service RED dashboard (Rate, Errors, Duration) per service. Kafka consumer lag panel. Redis memory + ops/s. PostgreSQL connection pool saturation.',
+        tags: [['coral','Grafana']],
+        note: 'Start with the RED dashboard. It answers "is this service healthy?" in 3 numbers. Add infrastructure panels after you have service-level visibility.'
+      },
+      {
+        title: 'Structured logging with zap + trace correlation',
+        desc: 'Every log entry includes: trace_id, span_id, service, level. Ship to Elasticsearch via Filebeat or Fluentd. Build Kibana index pattern.',
+        tags: [['coral','zap'],['coral','ELK']],
+        note: 'The trace_id field is critical. When a request fails, you grab the trace ID from the span, search Kibana, and see every log line from every service for that request.'
+      },
+      {
+        title: 'Health check endpoints',
+        desc: '/healthz (liveness) and /readyz (readiness) on each service. Readiness checks: DB ping, Redis ping, Kafka producer connectivity. Used by Docker + future k8s.',
+        tags: [['gray','health checks'],['gray','Docker']]
+      },
+      {
+        title: 'Load test with k6 or hey',
+        desc: 'Simulate 100 concurrent users sending messages. Watch Grafana for saturation. Look for goroutine leaks (pprof /debug/pprof/goroutine). Fix bottlenecks.',
+        tags: [['gray','load testing'],['coral','pprof']],
+        note: 'This is where you\'ll discover if your worker pool sizing is wrong, if connection pools are too small, or if Redis pub/sub is the bottleneck.'
+      }
+    ]
+  }
+];
+
+const TECH = [
+  { name: 'gRPC', role: 'Inter-service sync calls' },
+  { name: 'Kafka', role: 'Async event fanout' },
+  { name: 'Redis', role: 'Sessions, pub/sub, rate limit' },
+  { name: 'PostgreSQL', role: 'Primary data store' },
+  { name: 'pgx/v5', role: 'PostgreSQL driver + pool' },
+  { name: 'protoc', role: 'gRPC code generation' },
+  { name: 'oapi-codegen', role: 'OpenAPI server/client gen' },
+  { name: 'mockery', role: 'Interface mock generation' },
+  { name: 'goose', role: 'DB schema migrations' },
+  { name: 'viper', role: 'Config loading' },
+  { name: 'zap', role: 'Structured logging' },
+  { name: 'OpenTelemetry', role: 'Traces, metrics, logs' },
+  { name: 'Grafana', role: 'Metrics dashboards' },
+  { name: 'Elasticsearch', role: 'Log storage + search' },
+  { name: 'Docker', role: 'Containerized dev env' },
+  { name: 'Makefile', role: 'Developer workflow CLI' },
+];
+
+// Render phases
+const phasesEl = document.getElementById('phases');
+PHASES.forEach(phase => {
+  const totalSteps = phase.steps.length;
+  const el = document.createElement('div');
+  el.className = 'phase';
+  el.id = phase.id;
+
+  const stepsHTML = phase.steps.map((s, i) => {
+    const tagsHTML = (s.tags||[]).map(([cls,lbl]) => `<span class="tag ${cls}">${lbl}</span>`).join('');
+    const codeHTML = s.code ? `<span class="code-ref">${s.code}</span>` : '';
+    const noteHTML = s.note ? `<div class="note" style="margin:6px 0 2px;">${s.note}</div>` : '';
+    return `
+      <div class="step" data-phase="${phase.id}" data-step="${i}" onclick="toggleStep(this)">
+        <div class="step-check"></div>
+        <div class="step-content">
+          <div class="step-title">${s.title} ${codeHTML}</div>
+          <div class="step-desc">${s.desc}</div>
+          ${s.tags && s.tags.length ? `<div class="step-tags">${tagsHTML}</div>` : ''}
+          ${noteHTML}
+        </div>
+      </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="phase-header" onclick="togglePhase(this.closest('.phase'))">
+      <div class="phase-number">${phase.number}</div>
+      <div class="phase-header-content">
+        <div class="phase-title-row">
+          <span class="phase-name">${phase.name}</span>
+          <span class="phase-badge ${phase.badge}">${phase.badge}</span>
+        </div>
+        <div class="phase-subtitle">${phase.subtitle}</div>
+      </div>
+      <div class="phase-meta">
+        <span class="phase-progress-mini" id="${phase.id}-count">0 / ${totalSteps}</span>
+        <span class="phase-chevron">▶</span>
+      </div>
+    </div>
+    <div class="phase-body">
+      <div class="steps">${stepsHTML}</div>
+    </div>`;
+  phasesEl.appendChild(el);
+});
+
+// Render tech grid
+const techEl = document.getElementById('techGrid');
+TECH.forEach(t => {
+  const d = document.createElement('div');
+  d.className = 'tech-item';
+  d.innerHTML = `<div class="tech-name">${t.name}</div><div class="tech-role">${t.role}</div>`;
+  techEl.appendChild(d);
+});
+
+// Sidenav
+const nav = document.getElementById('sidenav');
+const navItems = [
+  {id:'sec-arch', label:'Architecture'},
+  {id:'sec-phases', label:'Phases'},
+  ...PHASES.map(p => ({id:p.id, label:`Phase ${p.number}`})),
+  {id:'sec-tech', label:'Tech ref'},
+];
+navItems.forEach(item => {
+  const dot = document.createElement('div');
+  dot.className = 'sidenav-dot';
+  dot.innerHTML = `<div class="sidenav-tip">${item.label}</div>`;
+  dot.onclick = () => document.getElementById(item.id)?.scrollIntoView({behavior:'smooth'});
+  nav.appendChild(dot);
+});
+
+// Toggle phase
+function togglePhase(phase) {
+  phase.classList.toggle('open');
+}
+
+// Toggle arch panel
+function toggleArch(btn) {
+  btn.classList.toggle('open');
+  const body = btn.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+// Toggle step
+function toggleStep(step) {
+  step.classList.toggle('done-step');
+  saveState();
+  updateProgress();
+}
+
+// Progress
+function updateProgress() {
+  const allSteps = document.querySelectorAll('.step');
+  const doneSteps = document.querySelectorAll('.step.done-step');
+  const total = allSteps.length;
+  const done = doneSteps.length;
+  document.getElementById('progressFill').style.width = total ? (done/total*100)+'%' : '0%';
+  document.getElementById('progressCount').textContent = `${done} / ${total}`;
+
+  PHASES.forEach(phase => {
+    const phaseSteps = document.querySelectorAll(`[data-phase="${phase.id}"]`);
+    const phaseDone = document.querySelectorAll(`[data-phase="${phase.id}"].done-step`);
+    const countEl = document.getElementById(`${phase.id}-count`);
+    if (countEl) countEl.textContent = `${phaseDone.length} / ${phaseSteps.length}`;
+  });
+}
+
+// Persist
+function saveState() {
+  const done = [];
+  document.querySelectorAll('.step.done-step').forEach(s => {
+    done.push(`${s.dataset.phase}-${s.dataset.step}`);
+  });
+  try { localStorage.setItem('roadmap-done', JSON.stringify(done)); } catch(e){}
+}
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('roadmap-done') || '[]');
+    saved.forEach(key => {
+      const [phase, step] = key.split('-').map((v,i) => i===1 ? Number(v) : v);
+      const el = document.querySelector(`[data-phase="${phase}"][data-step="${step}"]`);
+      if (el) el.classList.add('done-step');
+    });
+  } catch(e){}
+}
+
+// Scroll spy for sidenav
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      document.querySelectorAll('.sidenav-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', navItems[i]?.id === id);
+      });
+    }
+  });
+}, { threshold: 0.3 });
+
+navItems.forEach(item => {
+  const el = document.getElementById(item.id);
+  if (el) observer.observe(el);
+});
+
+// Open first phase by default
+document.querySelector('.phase')?.classList.add('open');
+
+loadState();
+updateProgress();
+</script>
+</body>
+</html>

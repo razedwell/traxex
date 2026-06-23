@@ -18,13 +18,15 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	ImageTag string `mapstructure:"image_tag"`
-	Name     string `mapstructure:"name"`
-	User     string `mapstructure:"user"`
-	Password string `mapstructure:"password"`
-	Database string `mapstructure:"database"`
-	Host     string `mapstructure:"host"`
-	Port     string `mapstructure:"port"`
+	ImageTag     string `mapstructure:"image_tag"`
+	Name         string `mapstructure:"name"`
+	User         string `mapstructure:"user"`
+	Password     string `mapstructure:"password"`
+	Database     string `mapstructure:"database"`
+	Host         string `mapstructure:"host"`
+	Port         string `mapstructure:"port"`
+	SSLMode      string `mapstructure:"ssl_mode"`
+	PoolMaxConns int    `mapstructure:"pool_max_conns"`
 }
 
 type RedisConfig struct {

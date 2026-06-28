@@ -2,19 +2,33 @@ package config
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/viper"
+	"github.com/subosito/gotenv"
 )
 
 type Config struct {
 	Server   ServerConfig   `mapstructure:"server"`
 	Database DatabaseConfig `mapstructure:"database"`
 	Redis    RedisConfig    `mapstructure:"redis"`
+	Kafka    KafkaConfig    `mapstructure:"kafka"`
+	Logging  LoggingConfig  `mapstructure:"logging"`
 }
-
+type KafkaConfig struct {
+	Brokers           []string `mapstructure:"brokers"`
+	GroupID           string   `mapstructure:"group_id"`
+	ReplicationFactor int      `mapstructure:"replication_factor"`
+}
+type LoggingConfig struct {
+	Level  string `mapstructure:"level"`  // "debug" | "info" | "warn" | "error"
+	Format string `mapstructure:"format"` // "json" | "console"
+}
 type ServerConfig struct {
-	Port int `mapstructure:"port"`
+	Port           int    `mapstructure:"port"`
+	Host           string `mapstructure:"host"`
+	TimeoutSeconds int    `mapstructure:"timeout_seconds"`
 }
 
 type DatabaseConfig struct {
@@ -24,16 +38,16 @@ type DatabaseConfig struct {
 	Password     string `mapstructure:"password"`
 	Database     string `mapstructure:"database"`
 	Host         string `mapstructure:"host"`
-	Port         string `mapstructure:"port"`
+	Port         uint16 `mapstructure:"port"`
 	SSLMode      string `mapstructure:"ssl_mode"`
-	PoolMaxConns int    `mapstructure:"pool_max_conns"`
+	PoolMaxConns int32  `mapstructure:"pool_max_conns"`
 }
 
 type RedisConfig struct {
 	Host     string `mapstructure:"host"`
-	Port     string `mapstructure:"port"`
+	Port     uint16 `mapstructure:"port"`
 	Password string `mapstructure:"password"`
-	DB       string `mapstructure:"db"`
+	DB       int    `mapstructure:"db"`
 	PoolSize int    `mapstructure:"pool_size"`
 }
 
@@ -58,15 +72,23 @@ func LoadConfig(path string) (*Config, error) {
 		}
 	}
 
-	// 3. Load from .env (overrides YAML)
-	v.AddConfigPath(path)
-	v.SetConfigName(".env")
-	v.SetConfigType("env")
-	_ = v.ReadInConfig() // Don't fail if .env doesn't exist
+	// 3. Load .env into process env (overrides YAML via BindEnv below).
+	// Do NOT use ReadInConfig for .env — it flattens keys and wipes nested YAML like database.password.
+	_ = gotenv.Load(filepath.Join(path, ".env"))
 
-	// 4. Enable env vars (highest priority)
+	// 4. Env vars (highest priority): APP_* plus docker-style names from root .env
 	v.SetEnvPrefix("APP")
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	for _, binding := range []struct{ key, envKey string }{
+		{"database.password", "POSTGRES_PASSWORD"},
+		{"database.user", "POSTGRES_USER"},
+		{"database.host", "POSTGRES_HOST"},
+		{"database.port", "POSTGRES_PORT"},
+		{"database.database", "POSTGRES_DB"},
+		{"redis.port", "REDIS_PORT"},
+	} {
+		_ = v.BindEnv(binding.key, binding.envKey)
+	}
 	v.AutomaticEnv()
 
 	var cfg Config
@@ -85,5 +107,30 @@ func (c *Config) Validate() error {
 	if c.Database.Password == "" {
 		return fmt.Errorf("Database password cannot be empty")
 	}
+
+	if c.Database.PoolMaxConns == 0 {
+		return fmt.Errorf("Database pool max connections must be greater than 0")
+	}
+
+	if c.Database.Port == 0 {
+		return fmt.Errorf("Database port cannot be 0")
+	}
+
+	if c.Server.Port < 1 || c.Server.Port > 65535 {
+		return fmt.Errorf("Server port must be between 1 and 65535")
+	}
+
+	if c.Redis.DB < 0 || c.Redis.DB > 15 {
+		return fmt.Errorf("Redis DB must be between 0 and 15")
+	}
+
+	if c.Redis.Port == 0 {
+		return fmt.Errorf("Redis port cannot be 0")
+	}
+
+	if c.Redis.PoolSize == 0 {
+		return fmt.Errorf("Redis pool size must be greater than 0")
+	}
+
 	return nil
 }

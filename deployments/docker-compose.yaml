@@ -1,4 +1,4 @@
-version: '3.9'
+name: traxex
 services:
   postgres:
     image: postgres:${POSTGRES_IMAGE_TAG}

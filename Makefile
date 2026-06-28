@@ -30,11 +30,19 @@ test:
 
 build:
 	@echo "Building the binary artifact..."
-	go build -o bin/auth-service ./services/auth/cmd
+	go build -o bin/auth-service ./services/auth/cmd/server
 
-docker-compose:
+docker-up:
 	@echo "Starting services with Docker Compose..."
-	docker compose up -d --build -f deploy/docker-compose.yaml
+	docker compose \
+		--env-file deployments/.env \
+		-f deployments/docker-compose.yaml up -d --build
+
+docker-down:
+	@echo "Stopping services with Docker Compose..."
+	docker compose \
+		--env-file deployments/.env \
+		-f deployments/docker-compose.yaml down -v
 
 docker-build:
 	@echo "Building Docker images..."
@@ -58,3 +66,7 @@ deps:
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
 	@echo "Dependencies installed successfully."
+
+lint:
+	@echo "Linting the code..."
+	go vet ./...

@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 1 — Detailed Build Instructions</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0a0c10;
+  --bg1:      #0f1218;
+  --bg2:      #141820;
+  --bg3:      #1c2230;
+  --border:   #1e2840;
+  --border2:  #2a3655;
+  --text:     #c8d4e8;
+  --text2:    #7a8aaa;
+  --text3:    #4a5a7a;
+  --accent:   #3b82f6;
+  --accent2:  #60a5fa;
+  --green:    #34d399;
+  --amber:    #fbbf24;
+  --coral:    #f87171;
+  --purple:   #a78bfa;
+  --teal:     #2dd4bf;
+  --mono:     'JetBrains Mono', monospace;
+  --display:  'Syne', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.65;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+.wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+  position: relative;
+  z-index: 1;
+}
+
+header {
+  padding: 48px 0 40px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+
+.header-tag {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 14px;
+}
+
+h1 {
+  font-family: var(--display);
+  font-size: clamp(26px, 4vw, 44px);
+  font-weight: 800;
+  line-height: 1.1;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin-bottom: 14px;
+}
+h1 span { color: var(--accent2); }
+
+.subtitle {
+  color: var(--text2);
+  font-size: 12px;
+  max-width: 640px;
+  line-height: 1.75;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 11px;
+  color: var(--accent2);
+  text-decoration: none;
+}
+.back-link:hover { text-decoration: underline; }
+
+.section-header {
+  font-family: var(--display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin: 48px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-header::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* status snapshot */
+.snapshot {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.snap-item {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+.snap-name { font-size: 11px; color: #fff; font-weight: 500; margin-bottom: 4px; }
+.snap-status { font-size: 10px; }
+.snap-status.done   { color: var(--green); }
+.snap-status.partial{ color: var(--amber); }
+.snap-status.todo   { color: var(--coral); }
+
+/* principles box */
+.principles {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin: 16px 0;
+}
+.principles h3 {
+  font-family: var(--display);
+  font-size: 13px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.principles ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.principles li {
+  font-size: 11px;
+  color: var(--text2);
+  padding-left: 14px;
+  position: relative;
+}
+.principles li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--teal);
+}
+
+/* step blocks */
+.step-block {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.step-block:hover { border-color: var(--border2); }
+
+.step-header {
+  padding: 16px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  user-select: none;
+}
+.step-num {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text3);
+  min-width: 32px;
+  line-height: 1;
+  padding-top: 2px;
+}
+.step-header-text { flex: 1; }
+.step-title {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.step-one-liner { font-size: 11px; color: var(--text2); }
+
+.status-badge {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 1px solid;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+.status-badge.done    { color: var(--green); border-color: #065f46; background: #06402022; }
+.status-badge.partial { color: var(--amber); border-color: #92400e; background: #45200422; }
+.status-badge.todo    { color: var(--coral); border-color: #991b1b; background: #5f0f0f22; }
+
+.step-chevron {
+  color: var(--text3);
+  font-size: 10px;
+  margin-top: 6px;
+  transition: transform 0.2s;
+}
+.step-block.open .step-chevron { transform: rotate(90deg); }
+
+.step-body {
+  display: none;
+  border-top: 1px solid var(--border);
+  padding: 0 20px 20px 66px;
+}
+.step-block.open .step-body { display: block; }
+
+.subsection {
+  margin-top: 20px;
+}
+.subsection-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 8px;
+}
+
+p, .prose {
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+p strong, .prose strong { color: var(--text); }
+
+.note {
+  background: var(--bg2);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  padding: 11px 14px;
+  margin: 12px 0;
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+.note.warn { border-left-color: var(--amber); }
+.note.ok   { border-left-color: var(--green); }
+.note.yagni{ border-left-color: var(--purple); }
+
+.checklist {
+  list-style: none;
+  margin: 8px 0;
+}
+.checklist li {
+  font-size: 11px;
+  color: var(--text2);
+  padding: 5px 0 5px 22px;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+}
+.checklist li:last-child { border-bottom: none; }
+.checklist li::before {
+  content: '☐';
+  position: absolute;
+  left: 0;
+  color: var(--text3);
+}
+
+pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-x: auto;
+  margin: 10px 0;
+  color: var(--text2);
+}
+pre .kw  { color: var(--purple); }
+pre .ty  { color: var(--teal); }
+pre .cm  { color: var(--text3); }
+pre .fn  { color: var(--accent2); }
+pre .str { color: var(--green); }
+
+.verify {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-top: 12px;
+}
+.verify-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 6px;
+}
+.verify code {
+  font-size: 10px;
+  color: var(--teal);
+}
+
+.issue-list {
+  margin: 8px 0;
+}
+.issue {
+  font-size: 11px;
+  color: var(--text2);
+  padding: 6px 0;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.issue-tag {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.issue-tag.fix  { background: #45200422; color: var(--amber); border: 1px solid #92400e; }
+.issue-tag.ok   { background: #06402022; color: var(--green); border: 1px solid #065f46; }
+.issue-tag.skip { background: #3b197022; color: var(--purple); border: 1px solid #5b21b6; }
+
+.order-flow {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 18px;
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 2;
+  margin: 12px 0;
+}
+.order-flow .highlight { color: var(--accent2); }
+
+@media (max-width: 600px) {
+  .step-body { padding-left: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="header-tag">Phase 01 · detailed instructions</div>
+  <h1>Repo &amp; Shared<br><span>Foundations</span></h1>
+  <p class="subtitle">
+    Expanded guide for Phase 1 of the <a href="roadmap.html" style="color:var(--accent2)">roadmap</a>.
+    No copy-paste implementations — only interfaces, pseudo-code, checklists, and explanations.
+    Written against your <em>current</em> codebase as of today.
+  </p>
+  <a class="back-link" href="roadmap.html">← back to full roadmap</a>
+</header>
+
+<!-- CURRENT STATE -->
+<div class="section-header" id="snapshot">current state snapshot</div>
+<div class="snapshot">
+  <div class="snap-item"><div class="snap-name">Makefile</div><div class="snap-status partial">partial — path bugs</div></div>
+  <div class="snap-item"><div class="snap-name">docker-compose.yml</div><div class="snap-status partial">partial — needs .env</div></div>
+  <div class="snap-item"><div class="snap-name">shared/config</div><div class="snap-status partial">partial — struct gaps</div></div>
+  <div class="snap-item"><div class="snap-name">shared/traxerr</div><div class="snap-status partial">partial — skeleton only</div></div>
+  <div class="snap-item"><div class="snap-name">shared/postgres</div><div class="snap-status partial">partial — core OK</div></div>
+  <div class="snap-item"><div class="snap-name">shared/redis</div><div class="snap-status todo">empty stub</div></div>
+  <div class="snap-item"><div class="snap-name">shared/observability</div><div class="snap-status todo">not started</div></div>
+  <div class="snap-item"><div class="snap-name">shared/kafka</div><div class="snap-status todo">not started</div></div>
+</div>
+
+<div class="principles">
+  <h3>How to use this doc + guiding principles</h3>
+  <ul>
+    <li><strong>YAGNI</strong> — Phase 1 builds thin factories and helpers, not production-grade frameworks. Skip retry policies, circuit breakers, connection retry loops, and generic abstractions until a service actually needs them.</li>
+    <li><strong>Single responsibility</strong> — Each <code>shared/</code> package does one thing: load config, open a pool, create a client. Business logic stays in <code>services/*/internal/</code>.</li>
+    <li><strong>Dependency direction</strong> — <code>shared/</code> must never import from <code>services/</code>. Services import shared. This keeps your monorepo acyclic.</li>
+    <li><strong>Verify as you go</strong> — Every step ends with a "done when" checklist. Don't move on until the verify commands pass.</li>
+    <li><strong>Recommended order</strong> — Follow the numbered steps below. Config and docker-compose come first because everything else depends on them.</li>
+  </ul>
+</div>
+
+<div class="order-flow">
+  recommended build order:<br>
+  <span class="highlight">1. Makefile fixes</span> →
+  <span class="highlight">2. docker-compose + .env</span> →
+  <span class="highlight">3. config</span> →
+  <span class="highlight">4. traxerr</span> →
+  <span class="highlight">5. postgres</span> →
+  <span class="highlight">6. redis</span> →
+  <span class="highlight">7. observability</span> →
+  <span class="highlight">8. kafka</span>
+</div>
+
+<!-- STEPS -->
+<div class="section-header" id="steps">detailed steps</div>
+
+<!-- STEP 1 -->
+<div class="step-block open" onclick="toggleStep(this, event)">
+  <div class="step-header">
+    <div class="step-num">1</div>
+    <div class="step-header-text">
+      <div class="step-title">Makefile — your project CLI</div>
+      <div class="step-one-liner">Fix broken paths, add missing targets, keep it minimal.</div>
+    </div>
+    <span class="status-badge partial">partial</span>
+    <span class="step-chevron">▶</span>
+  </div>
+  <div class="step-body">
+
+    <div class="subsection">
+      <div class="subsection-title">Why</div>
+      <p>The Makefile is the single entry point for repetitive tasks. Without correct paths, <code>make docker-compose</code> and <code>make gen-openapi</code> fail silently or point at files that don't exist. You will run these dozens of times per week.</p>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">What you already have</div>
+      <div class="issue-list">
+        <div class="issue"><span class="issue-tag ok">ok</span> <span><code>generate</code>, <code>gen-proto</code>, <code>gen-mocks</code>, <code>test</code>, <code>build</code>, <code>deps</code>, <code>clean</code></span></div>
+        <div class="issue"><span class="issue-tag fix">fix</span> <span><code>docker-compose</code> references <code>deploy/docker-compose.yaml</code> — your file is at <code>deployments/docker-compose.yml</code></span></div>
+        <div class="issue"><span class="issue-tag fix">fix</span> <span><code>gen-openapi</code> references <code>services/auth/api/openapi3/openapi.yaml</code> — your file is at <code>services/auth/openapi.yaml</code></span></div>
+        <div class="issue"><span class="issue-tag fix">fix</span> <span><code>build</code> outputs to <code>./services/auth/cmd</code> — should be <code>./services/auth/cmd/server</code></span></div>
+        <div class="issue"><span class="issue-tag skip">defer</span> <span><code>migrate-up</code>/<code>migrate-down</code> are TODO stubs — fine for Phase 1; implement when you write your first migration in Phase 2</span></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">What to implement</div>
+      <ul class="checklist">
+        <li>Fix the three broken paths above</li>
+        <li>Add <code>docker-up</code> and <code>docker-down</code> aliases (or rename <code>docker-compose</code> → <code>docker-up</code> for roadmap consistency)</li>
+        <li>Add a <code>lint</code> target — even if it just runs <code>go vet ./...</code> for now</li>
+        <li>Use <code>docker compose -f deployments/docker-compose.yml</code> consistently</li>
+        <li>Optionally add <code>COMPOSE_ENV_FILE</code> variable pointing at <code>deployments/.env</code></li>
+      </ul>
+
+      <pre><span class="cm"># pseudo-structure — adapt to your naming</span>
+
+<span class="kw">.PHONY:</span> docker-up docker-down lint
+
+<span class="fn">docker-up</span>:
+	docker compose --env-file deployments/.env \
+	  -f deployments/docker-compose.yml up -d
+
+<span class="fn">docker-down</span>:
+	docker compose --env-file deployments/.env \
+	  -f deployments/docker-compose.yml down
+
+<span class="fn">lint</span>:
+	go vet ./...</pre>
+    </div>
+
+    <div class="note yagni"><strong>Don't build yet:</strong> proto generation wiring (no <code>.proto</code> files yet), full migrate integration, CI pipelines, or multi-service build matrix. One service (<code>auth</code>) is enough.</div>
+
+    <div class="verify">
+      <div class="verify-title">✓ done when</div>
+      <code>make build</code> compiles without error<br>
+      <code>make docker-up</code> starts containers (after Step 2)<br>
+      <code>make lint</code> exits 0
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="step-block" onclick="toggleStep(this, event)">
+  <div class="step-header">
+    <div class="step-num">2</div>
+    <div class="step-header-text">
+      <div class="step-title">docker-compose.yml — local infra</div>
+      <div class="step-one-liner">Postgres, Redis, Kafka, ELK, Grafana. Wire env vars.</div>
+    </div>
+    <span class="status-badge partial">partial</span>
+    <span class="step-chevron">▶</span>
+  </div>
+  <div class="step-body">
+
+    <div class="subsection">
+      <div class="subsection-title">Why</div>
+      <p>Every shared package you write needs something to connect to. Docker Compose gives you a reproducible local stack. Your Go services run on the host (for fast rebuild); infra runs in containers.</p>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">What you already have</div>
+      <p>Your <code>deployments/docker-compose.yml</code> is solid: postgres, redis, zookeeper, kafka, elasticsearch, kibana, grafana — all present with volumes and ports. This is more complete than most Phase 1 setups.</p>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">What's missing / needs fixing</div>
+      <ul class="checklist">
+        <li>Create <code>deployments/.env</code> (or <code>deployments/.env.example</code> committed + local <code>.env</code> gitignored) with all <code>${VAR}</code> placeholders your compose file uses</li>
+        <li>Align env var names with <code>config.yaml</code> values (same user, password, db name, ports)</li>
+        <li>Add healthchecks to postgres and redis (optional but helps <code>depends_on</code> later)</li>
+        <li>Document which ports map to what in a comment at the top of the compose file</li>
+      </ul>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">deployments/.env — what to put in it</div>
+      <pre><span class="cm"># one source of truth for docker-compose variable substitution</span>
+POSTGRES_IMAGE_TAG=16-alpine
+POSTGRES_CONTAINER_NAME=traxex-postgres
+POSTGRES_USER=traxex
+POSTGRES_PASSWORD=dev_password
+POSTGRES_DB=traxex_dev
+POSTGRES_PORT=5432
+
+REDIS_IMAGE_TAG=7-alpine
+REDIS_CONTAINER_NAME=traxex-redis
+REDIS_PORT=6379
+
+<span class="cm"># ... kafka, zookeeper, elasticsearch, kibana, grafana vars</span>
+<span class="cm"># mirror the ${VAR} names already in your compose file</span></pre>
+    </div>
+
+    <div class="note ok"><strong>Your config.yaml already matches.</strong> <code>database.user=traxex</code>, <code>database.password=dev_password</code>, <code>database.database=traxex_dev</code> — keep these in sync with <code>deployments/.env</code>.</div>
+
+    <div class="note yagni"><strong>Don't build yet:</strong> Kafka topic auto-creation (Phase 3), auth service container in compose (Phase 2), OTel collector sidecar (Phase 6), Kubernetes manifests.</div>
+
+    <div class="verify">
+      <div class="verify-title">✓ done when</div>
+      <code>make docker-up</code> → all containers healthy<br>
+      <code>psql -h localhost -U traxex -d traxex_dev</code> connects<br>
+      <code>redis-cli -p 6379 ping</code> → PONG<br>
+      <code>curl localhost:9200</code> → Elasticsearch responds<br>
+      Grafana at <code>localhost:3000</code> loads
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="step-block" onclick="toggleStep(this, event)">
+  <div class="step-header">
+    <div class="step-num">3</div>
+    <div class="step-header-text">
+      <div class="step-title">shared/config — configuration loader</div>
+      <div class="step-one-liner">Viper loader with defaults, YAML, .env, env vars. Align structs with config.yaml.</div>
+    </div>
+    <span class="status-badge partial">partial</span>
+    <span class="step-chevron">▶</span>
+  </div>
+  <div class="step-body">
+
+    <div class="subsection">
+      <div class="subsection-title">Why</div>
+      <p>Every service needs the same config loading pattern: sensible defaults for local dev, overridden by files, overridden again by env vars (for Docker/k8s). Centralizing this in <code>shared/config</code> means you write the precedence logic once.</p>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">What you already have (good)</div>
+      <div class="issue-list">
+        <div class="issue"><span class="issue-tag ok">ok</span> <span>Viper with defaults → YAML → .env → <code>APP_*</code> env vars</span></div>
+        <div class="issue"><span class="issue-tag ok">ok</span> <span><code>mapstructure</code> tags on structs</span></div>
+        <div class="issue"><span class="issue-tag ok">ok</span> <span>Basic <code>Validate()</code> for required fields</span></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Gaps to close</div>
+      <ul class="checklist">
+        <li><code>config.yaml</code> has fields your Go struct doesn't: <code>server.host</code>, <code>server.timeout_seconds</code>, entire <code>kafka</code> block, entire <code>logging</code> block</li>
+        <li><code>RedisConfig.DB</code> is <code>string</code> but YAML has <code>db: 0</code> (int) — pick <code>int</code></li>
+        <li><code>DatabaseConfig.ImageTag</code> is docker-compose concern — remove from app config (YAGNI) or ignore it in Validate</li>
+        <li>Add default for <code>database.pool_max_conns</code> (e.g. 10) — your postgres package uses it</li>
+        <li>Add default for <code>database.ssl_mode</code> → <code>"disable"</code></li>
+        <li>Decide: one monolithic <code>Config</code> struct vs generic loader — for Phase 1, <strong>keep one struct</strong>. Generic <code>Load[T any](path)</code> is nice but not required yet</li>
+      </ul>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Target struct shape (pseudo-code)</div>
+      <pre><span class="kw">type</span> <span class="ty">Config</span> <span class="kw">struct</span> {
+    Server   ServerConfig
+    Database DatabaseConfig
+    Redis    RedisConfig
+    Kafka    KafkaConfig    <span class="cm">// add — even if unused until Phase 3</span>
+    Logging  LoggingConfig  <span class="cm">// add — used in Step 7</span>
+}
+
+<span class="kw">type</span> <span class="ty">KafkaConfig</span> <span class="kw">struct</span> {
+    Brokers           []<span class="ty">string</span>
+    GroupID           <span class="ty">string</span>
+    ReplicationFactor <span class="ty">int</span>
+}
+
+<span class="kw">type</span> <span class="ty">LoggingConfig</span> <span class="kw">struct</span> {
+    Level  <span class="ty">string</span>  <span class="cm">// "debug" | "info" | "warn" | "error"</span>
+    Format <span class="ty">string</span>  <span class="cm">// "json" | "console"</span>
+}
+
+<span class="cm">// Validate() — expand minimally:</span>
+<span class="cm">// - database.password non-empty (you have this)</span>
+<span class="cm">// - server.port in range 1-65535</span>
+<span class="cm">// - redis.db >= 0</span>
+<span class="cm">// Don't validate kafka brokers until you use kafka</span></pre>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">How services will use it (Phase 2 preview)</div>
+      <pre><span class="cm">// services/auth/cmd/server/main.go — later</span>
+cfg, err := config.LoadConfig(<span class="str">"."</span>)  <span class="cm">// path = repo root or service dir</span>
+<span class="cm">// pass cfg.Database to postgres.NewPool</span>
+<span class="cm">// pass cfg.Redis to redis.NewClient</span></pre>
+    </div>
+
+    <div class="note warn"><strong>Path consideration:</strong> <code>LoadConfig(".")</code> assumes you run the binary from repo root. Later you may pass an explicit path or use <code>os.Getenv("CONFIG_PATH")</code>. For Phase 1, running from root is fine.</div>
+
+    <div class="verify">
+      <div class="verify-title">✓ done when</div>
+      Write a tiny test or <code>main</code> snippet that calls <code>LoadConfig(".")</code> and prints non-zero values<br>
+      All fields in <code>config.yaml</code> unmarshal without silent zero-values<br>
+      <code>APP_DATABASE_PASSWORD=override go run ...</code> overrides YAML
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div class="step-block" onclick="toggleStep(this, event)">
+  <div class="step-header">
+    <div class="step-num">4</div>
+    <div class="step-header-text">
+      <div class="step-title">shared/traxerr — typed application errors</div>
+      <div class="step-one-liner">AppError with codes, Error() impl, optional gRPC mapping hook.</div>
+    </div>
+    <span class="status-badge partial">partial</span>
+    <span class="step-chevron">▶</span>
+  </div>
+  <div class="step-body">
+
+    <div class="subsection">
+      <div class="subsection-title">Why</div>
+      <p>Services should return domain-meaningful errors (<code>NOT_FOUND</code>, <code>UNAUTHORIZED</code>), not raw <code>fmt.Errorf("user not found")</code> strings. Handlers translate these to HTTP status codes or gRPC statuses. One error type across all services keeps handler code uniform.</p>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">What you already have</div>
+      <p><code>Traxerr</code> struct with <code>Code</code>, <code>Message</code>, <code>Details</code>. <code>Code</code> is a string type alias. That's the skeleton — now flesh it out.</p>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">What to implement</div>
+      <ul class="checklist">
+        <li>Define constant codes in <code>code.go</code> (start with 5–6, add more in Phase 2)</li>
+        <li>Implement <code>error</code> interface on <code>Traxerr</code></li>
+        <li>Constructor helpers: <code>New(code, msg)</code>, <code>Wrap(code, msg, cause)</code></li>
+        <li><code>IsCode(err, code)</code> helper for <code>errors.Is</code>-style checks</li>
+        <li>Stub <code>ToGRPCStatus(err) codes.Code</code> — full mapping in Phase 2 when gRPC handlers exist</li>
+      </ul>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Interface / pseudo-code</div>
+      <pre><span class="cm">// code.go</span>
+<span class="kw">type</span> <span class="ty">Code</span> <span class="ty">string</span>
+
+<span class="kw">const</span> (
+    CodeNotFound       Code = <span class="str">"NOT_FOUND"</span>
+    CodeUnauthorized   Code = <span class="str">"UNAUTHORIZED"</span>
+    CodeInvalidInput   Code = <span class="str">"INVALID_INPUT"</span>
+    CodeConflict       Code = <span class="str">"CONFLICT"</span>
+    CodeInternal       Code = <span class="str">"INTERNAL"</span>
+    CodeUnavailable    Code = <span class="str">"UNAVAILABLE"</span>
+)
+
+<span class="cm">// errors.go</span>
+<span class="kw">type</span> <span class="ty">Traxerr</span> <span class="kw">struct</span> {
+    Code    Code
+    Message <span class="ty">string</span>
+    Cause   <span class="ty">error</span>          <span class="cm">// optional — use errors.Unwrap</span>
+    Details map[<span class="ty">string</span>]<span class="ty">any</span>  <span class="cm">// optional context for logs/API</span>
+}
+
+<span class="kw">func</span> (<span class="ty">*Traxerr</span>) <span class="fn">Error</span>() <span class="ty">string</span>           <span class="cm">// return Message (or Message + Cause)</span>
+<span class="kw">func</span> (<span class="ty">*Traxerr</span>) <span class="fn">Unwrap</span>() <span class="ty">error</span>          <span class="cm">// return Cause</span>
+
+<span class="kw">func</span> <span class="fn">New</span>(code Code, msg <span class="ty">string</span>) *Traxerr
+<span class="kw">func</span> <span class="fn">Wrap</span>(code Code, msg <span class="ty">string</span>, cause <span class="ty">error</span>) *Traxerr
+<span class="kw">func</span> <span class="fn">IsCode</span>(err <span class="ty">error</span>, code Code) <span class="ty">bool</span>
+
+<span class="cm">// grpc.go — stub for now</span>
+<span class="kw">func</span> <span class="fn">GRPCCode</span>(code Code) <span class="ty">int</span>  <span class="cm">// maps to google.golang.org/grpc/codes</span>
+<span class="cm">// NOT_FOUND → codes.NotFound, UNAUTHORIZED → codes.Unauthenticated, etc.</span></pre>
+    </div>
+
+    <div class="note yagni"><strong>Don't build yet:</strong> HTTP status mapping (Phase 2 with oapi-codegen), error JSON serialization for REST responses, i18n, error catalog YAML. Keep it Go-native.</div>
+
+    <div class="verify">
+      <div class="verify-title">✓ done when</div>
+      Unit test: <code>errors.Is(traxerr.New(...), traxerr.New(...))</code> works via custom Is logic OR <code>IsCode</code> works<br>
+      <code>fmt.Errorf("wrap: %w", traxerr)</code> preserves code through <code>IsCode</code><br>
+      Package compiles with no unused imports
+    </div>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div class="step-block" onclick="toggleStep(this, event)">
+  <div class="step-header">
+    <div class="step-num">5</div>
+    <div class="step-header-text">
+      <div class="step-title">shared/postgres — pgx pool factory</div>
+      <div class="step-one-liner">Your NewPool + HealthCheck are on the right track. A few refinements.</div>
+    </div>
+    <span class="status-badge partial">partial</span>
+    <span class="step-chevron">▶</span>
+  </div>
+  <div class="step-body">
+
+    <div class="subsection">
+      <div class="subsection-title">Why</div>
+      <p>Every service that touches PostgreSQL needs a connection pool. Wrapping pgx in one place means consistent connection string format, pool sizing, and health checks. Repositories receive <code>*pgxpool.Pool</code> — they don't build connections themselves (Dependency Inversion).</p>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Review of your current code</div>
+      <div class="issue-list">
+        <div class="issue"><span class="issue-tag ok">ok</span> <span><code>NewPool(ctx, cfg)</code> takes context — correct, pgxpool.New needs it</span></div>
+        <div class="issue"><span class="issue-tag ok">ok</span> <span><code>HealthCheck</code> uses <code>pool.Ping(ctx)</code> — this is exactly right</span></div>
+        <div class="issue"><span class="issue-tag ok">ok</span> <span>Accepts <code>config.DatabaseConfig</code> — good, no duplication</span></div>
+        <div class="issue"><span class="issue-tag fix">improve</span> <span>Manual conn string with <code>fmt.Sprintf</code> works but breaks if password contains special chars — consider <code>pgxpool.ParseConfig</code> + setting fields on <code>Config.ConnConfig</code></span></div>
+        <div class="issue"><span class="issue-tag fix">improve</span> <span>Use <code>fmt.Errorf("...: %w", err)</code> for error wrapping (Go convention)</span></div>
+        <div class="issue"><span class="issue-tag fix">improve</span> <span>If <code>PoolMaxConns == 0</code>, pgx uses default — set explicit default in config instead</span></div>
+        <div class="issue"><span class="issue-tag skip">optional</span> <span>Ping inside <code>NewPool</code> after creation — catches bad credentials at startup. Useful for readiness probes later. Not required for Phase 1.</span></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Complete Phase 1 surface area</div>
+      <pre><span class="cm">// postgres.go — what this package should export in Phase 1</span>
+
+<span class="kw">func</span> <span class="fn">NewPool</span>(ctx context.Context, cfg config.DatabaseConfig) (*pgxpool.Pool, <span class="ty">error</span>)
+<span class="kw">func</span> <span class="fn">HealthCheck</span>(ctx context.Context, pool *pgxpool.Pool) <span class="ty">error</span>
+
+<span class="cm">// optional helper — keeps conn string logic testable</span>
+<span class="kw">func</span> <span class="fn">buildConnConfig</span>(cfg config.DatabaseConfig) (*pgxpool.Config, <span class="ty">error</span>)
+<span class="cm">// internally: ParseConfig or set Host, Port, User, Password, Database, SSLMode</span>
+<span class="cm">// set MaxConns from cfg.PoolMaxConns</span></pre>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">What NOT to add (YAGNI)</div>
+      <ul class="checklist">
+        <li>Query helpers or repository base types — those live in <code>services/*/internal/repository/</code></li>
+        <li>Migration runner — goose runs via Makefile in Phase 2</li>
+        <li>OTel pgx tracing wrapper — Phase 6</li>
+        <li>Retry/reconnect logic — pgx pool handles reconnect internally</li>
+        <li>Transaction helper — add when a service actually needs multi-statement txs</li>
+      </ul>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">How repositories will use it (Phase 2 preview)</div>
+      <pre><span class="cm">// services/auth/internal/repository/user.go — later</span>
+<span class="kw">type</span> <span class="ty">UserRepository</span> <span class="kw">struct</span> {
+    pool *pgxpool.Pool
+}
+
+<span class="kw">func</span> <span class="fn">NewUserRepository</span>(pool *pgxpool.Pool) *UserRepository
+
+<span class="cm">// methods use r.pool.QueryRow(ctx, sql, args...)</span>
+<span class="cm">// always pass ctx from handler — enables timeout + trace propagation</span></pre>
+    </div>
+
+    <div class="verify">
+      <div class="verify-title">✓ done when</div>
+      With docker postgres running:<br>
+      <code>go run ./cmd/pgtest</code> (tiny temp main) calls <code>NewPool</code> → no error<br>
+      <code>HealthCheck</code> returns nil<br>
+      Stop postgres container → <code>HealthCheck</code> returns error<br>
+      <code>go test ./shared/postgres/...</code> passes (even one integration test is enough)
+    </div>
+
+    <div class="note ok"><strong>Verdict:</strong> Your implementation is ~80% complete for Phase 1. Focus on error wrapping, conn config builder, and a manual smoke test. You're not doing it wrong.</div>
+  </div>
+</div>
+
+<!-- STEP 6 -->
+<div class="step-block" onclick="toggleStep(this, event)">
+  <div class="step-header">
+    <div class="step-num">6</div>
+    <div class="step-header-text">
+      <div class="step-title">shared/redis — go-redis client factory</div>
+      <div class="step-one-liner">Mirror the postgres package: NewClient + HealthCheck.</div>
+    </div>
+    <span class="status-badge todo">not started</span>
+    <span class="step-chevron">▶</span>
+  </div>
+  <div class="step-body">
+
+    <div class="subsection">
+      <div class="subsection-title">Why</div>
+      <p>Auth service stores sessions in Redis (Phase 2). Presence uses pub/sub (Phase 4). A shared factory keeps address/password/DB/pool-size consistent across services — same pattern as postgres.</p>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Dependency to add</div>
+      <pre>go get github.com/redis/go-redis/v9</pre>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">What to implement</div>
+      <pre><span class="kw">func</span> <span class="fn">NewClient</span>(cfg config.RedisConfig) *redis.Client
+<span class="cm">// build redis.Options from cfg.Host, cfg.Port, cfg.Password, cfg.DB, cfg.PoolSize</span>
+<span class="cm">// address = fmt.Sprintf("%s:%s", host, port)  OR net.JoinHostPort</span>
+
+<span class="kw">func</span> <span class="fn">HealthCheck</span>(ctx context.Context, client *redis.Client) <span class="ty">error</span>
+<span class="cm">// return client.Ping(ctx).Err()</span></pre>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Design notes</div>
+      <ul class="checklist">
+        <li>Return <code>*redis.Client</code> directly — no wrapper struct needed in Phase 1</li>
+        <li><code>NewClient</code> doesn't need context (client creation is sync, no network yet)</li>
+        <li>First real use is <code>Ping</code> in HealthCheck or at startup — that's when connection happens</li>
+        <li>Match config defaults: <code>pool_size: 10</code>, <code>db: 0</code></li>
+      </ul>
+    </div>
+
+    <div class="note yagni"><strong>Don't build yet:</strong> Session store abstraction, pub/sub wrapper, Redis Cluster support, key prefix helpers, distributed lock utilities.</div>
+
+    <div class="verify">
+      <div class="verify-title">✓ done when</div>
+      <code>NewClient</code> + <code>HealthCheck</code> return nil against docker redis<br>
+      Stop redis → HealthCheck fails<br>
+      Package mirrors postgres in simplicity (two exported functions)
+    </div>
+  </div>
+</div>
+
+<!-- STEP 7 -->
+<div class="step-block" onclick="toggleStep(this, event)">
+  <div class="step-header">
+    <div class="step-num">7</div>
+    <div class="step-header-text">
+      <div class="step-title">shared/observability — logger + trace bootstrap</div>
+      <div class="step-one-liner">Zap logger from config. OTel tracer provider stub exporting to stdout or OTLP.</div>
+    </div>
+    <span class="status-badge todo">not started</span>
+    <span class="step-chevron">▶</span>
+  </div>
+  <div class="step-body">
+
+    <div class="subsection">
+      <div class="subsection-title">Why</div>
+      <p>The roadmap says "wire early" — and it's right. Adding structured logging and trace IDs in Phase 2's <code>main.go</code> is trivial if the init functions exist. Retrofitting across handlers is painful.</p>
+      <p>For Phase 1, you only need <strong>bootstrap</strong>: create a logger, create a tracer provider, provide a shutdown function. No instrumentation yet — that comes when you write handlers.</p>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Dependencies</div>
+      <pre>go get go.uber.org/zap
+go get go.opentelemetry.io/otel
+go get go.opentelemetry.io/otel/sdk
+go get go.opentelemetry.io/otel/exporters/stdout/stdouttrace  <span class="cm"># dev only</span>
+<span class="cm"># OR for Grafana later:</span>
+<span class="cm"># go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc</span></pre>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Package layout</div>
+      <pre>shared/observability/
+├── logger.go    <span class="cm"># InitLogger(cfg) → *zap.Logger, cleanup func</span>
+├── tracer.go    <span class="cm"># InitTracer(serviceName) → shutdown func</span>
+└── context.go   <span class="cm"># LoggerFromContext, TraceFields — optional Phase 1</span></pre>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">logger.go — pseudo-code</div>
+      <pre><span class="kw">func</span> <span class="fn">InitLogger</span>(cfg config.LoggingConfig) (*zap.Logger, <span class="ty">func</span>(), <span class="ty">error</span>)
+<span class="cm">// if cfg.Format == "json" → zap.NewProductionConfig()</span>
+<span class="cm">// else → zap.NewDevelopmentConfig()</span>
+<span class="cm">// set Level from cfg.Level</span>
+<span class="cm">// return logger, func(){ logger.Sync() }, nil</span></pre>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">tracer.go — pseudo-code</div>
+      <pre><span class="kw">func</span> <span class="fn">InitTracer</span>(ctx context.Context, serviceName <span class="ty">string</span>) (<span class="ty">func</span>(context.Context) <span class="ty">error</span>, <span class="ty">error</span>)
+<span class="cm">// Phase 1: stdout exporter is fine — traces print to console in dev</span>
+<span class="cm">// create sdktrace.TracerProvider with batch span processor</span>
+<span class="cm">// otel.SetTracerProvider(provider)</span>
+<span class="cm">// otel.SetTextMapPropagator(propagation.TraceContext{})</span>
+<span class="cm">// return provider.Shutdown, nil</span></pre>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">context.go — optional but valuable</div>
+      <pre><span class="cm">// Helper to pull trace_id from active span and add to zap fields</span>
+<span class="kw">func</span> <span class="fn">TraceFields</span>(ctx context.Context) []zap.Field
+<span class="cm">// returns zap.String("trace_id", ...) if span exists</span>
+<span class="cm">// usage in Phase 2: logger.Info("user registered", TraceFields(ctx)...)</span></pre>
+    </div>
+
+    <div class="note yagni"><strong>Phase 1 scope limit:</strong> No Prometheus metrics, no log shipping to Elasticsearch, no gRPC interceptors, no custom Grafana dashboards. Just init + shutdown. Stdout exporter for traces is enough until Phase 6.</div>
+
+    <div class="verify">
+      <div class="verify-title">✓ done when</div>
+      Temp main: <code>InitLogger</code> → <code>logger.Info("hello")</code> prints JSON to stdout<br>
+      <code>InitTracer</code> → create span → <code>span.End()</code> → trace JSON appears on stdout<br>
+      Shutdown functions run without panic<br>
+      <code>config.Logging</code> section drives log level/format
+    </div>
+  </div>
+</div>
+
+<!-- STEP 8 -->
+<div class="step-block" onclick="toggleStep(this, event)">
+  <div class="step-header">
+    <div class="step-num">8</div>
+    <div class="step-header-text">
+      <div class="step-title">shared/kafka — producer/consumer helpers</div>
+      <div class="step-one-liner">Thin wrapper over segmentio/kafka-go. Context-aware, no retry framework.</div>
+    </div>
+    <span class="status-badge todo">not started</span>
+    <span class="step-chevron">▶</span>
+  </div>
+  <div class="step-body">
+
+    <div class="subsection">
+      <div class="subsection-title">Why</div>
+      <p>Messaging (Phase 3) and Notification (Phase 5) services publish/consume Kafka events. A shared wrapper standardizes broker config, writer/reader creation, and graceful close. You won't use it until Phase 3, but having the factory ready keeps Phase 3 focused on business logic.</p>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Library choice</div>
+      <p>Use <strong>segmentio/kafka-go</strong> — pure Go, no CGO, simpler local dev than confluent-kafka-go. Matches the roadmap's "segmentio/kafka-go or confluent" option.</p>
+      <pre>go get github.com/segmentio/kafka-go</pre>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Package layout + interfaces</div>
+      <pre>shared/kafka/
+├── producer.go
+├── consumer.go
+└── config.go   <span class="cm"># optional — or reuse config.KafkaConfig</span>
+
+<span class="cm">// producer.go</span>
+<span class="kw">type</span> <span class="ty">Producer</span> <span class="kw">struct</span> {
+    writer *kafka.Writer
+}
+
+<span class="kw">func</span> <span class="fn">NewProducer</span>(cfg config.KafkaConfig, topic <span class="ty">string</span>) *Producer
+<span class="cm">// kafka.Writer{ Addr, Topic, Balancer: &amp;kafka.LeastBytes{}}</span>
+
+<span class="kw">func</span> (p *Producer) <span class="fn">Publish</span>(ctx context.Context, key, value []<span class="ty">byte</span>) <span class="ty">error</span>
+<span class="cm">// writer.WriteMessages(ctx, kafka.Message{Key: key, Value: value})</span>
+
+<span class="kw">func</span> (p *Producer) <span class="fn">Close</span>() <span class="ty">error</span>
+
+<span class="cm">// consumer.go</span>
+<span class="kw">type</span> <span class="ty">Consumer</span> <span class="kw">struct</span> {
+    reader *kafka.Reader
+}
+
+<span class="kw">func</span> <span class="fn">NewConsumer</span>(cfg config.KafkaConfig, topic, groupID <span class="ty">string</span>) *Consumer
+<span class="cm">// kafka.Reader{ Brokers: cfg.Brokers, Topic, GroupID }</span>
+
+<span class="kw">func</span> (c *Consumer) <span class="fn">Read</span>(ctx context.Context) (kafka.Message, <span class="ty">error</span>)
+<span class="cm">// reader.ReadMessage(ctx) — respects ctx cancellation</span>
+
+<span class="kw">func</span> (c *Consumer) <span class="fn">Close</span>() <span class="ty">error</span></pre>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Design decisions</div>
+      <ul class="checklist">
+        <li>One writer per topic (producer) — kafka-go best practice</li>
+        <li>Pass <code>context.Context</code> on Publish/Read — enables timeout and cancellation</li>
+        <li>Don't wrap messages in custom structs yet — raw <code>[]byte</code> until you define event schemas in Phase 3</li>
+        <li>Export <code>Close()</code> on both — call from main's shutdown handler</li>
+      </ul>
+    </div>
+
+    <div class="note yagni"><strong>Don't build yet:</strong> Retry with exponential backoff, dead-letter queue, idempotent producer, schema registry, consumer offset commit abstraction, trace header injection (Phase 6).</div>
+
+    <div class="verify">
+      <div class="verify-title">✓ done when</div>
+      With docker kafka running:<br>
+      Producer publishes a message to topic <code>test.topic</code><br>
+      Consumer in same group reads it back<br>
+      Ctrl+C / context cancel → <code>Read</code> returns context error, <code>Close</code> clean<br>
+      <code>go build ./shared/kafka/...</code> succeeds
+    </div>
+
+    <div class="note warn"><strong>Kafka topic creation:</strong> kafka-go auto-creates topics by default on produce. Explicit topic creation via compose init script can wait until Phase 3 when you know topic names (<code>message.sent</code>, etc.).</div>
+  </div>
+</div>
+
+<!-- PHASE 1 EXIT CRITERIA -->
+<div class="section-header" id="exit">phase 1 exit criteria</div>
+
+<div class="principles">
+  <h3>You are done with Phase 1 when ALL of these are true</h3>
+  <ul>
+    <li><code>make docker-up</code> starts the full local stack; <code>make docker-down</code> tears it down</li>
+    <li><code>make build</code> and <code>make test</code> pass</li>
+    <li><code>shared/config</code> loads <code>config.yaml</code> with all sections; env override works</li>
+    <li><code>shared/traxerr</code> has working <code>Error()</code>, constructors, and <code>IsCode</code></li>
+    <li><code>shared/postgres</code> connects to docker postgres; HealthCheck works</li>
+    <li><code>shared/redis</code> connects to docker redis; HealthCheck works</li>
+    <li><code>shared/observability</code> initializes logger + tracer; shutdown is clean</li>
+    <li><code>shared/kafka</code> can produce and consume one message locally</li>
+    <li>No business logic in <code>shared/</code> — only infrastructure factories</li>
+  </ul>
+</div>
+
+<div class="note ok">
+  <strong>Optional smoke-test main.</strong> Consider a temporary <code>cmd/smoke/main.go</code> (gitignored or deleted before Phase 2) that wires config → postgres → redis → logger in one <code>main()</code>. This validates the whole foundation without building the auth service. Delete it once Phase 2's real <code>main.go</code> replaces it.
+</div>
+
+<!-- WHAT CHANGES IN PHASE 2 -->
+<div class="section-header" id="next">what you deliberately leave for phase 2</div>
+<p class="prose">Phase 1 is intentionally incomplete as an <em>application</em>. These are expected gaps — do not try to finish them now:</p>
+<ul class="checklist">
+  <li><code>services/auth/cmd/server/main.go</code> — empty; wired in Phase 2</li>
+  <li>Proto files, gRPC handlers, OpenAPI codegen — Phase 2</li>
+  <li>DB migrations (goose) — Phase 2 when users table is defined</li>
+  <li>Makefile <code>migrate-up</code>/<code>migrate-down</code> — Phase 2</li>
+  <li>Dockerfile for auth service — Phase 2</li>
+  <li>Full gRPC status mapping in traxerr — Phase 2</li>
+  <li>Kafka topic naming and event schemas — Phase 3</li>
+</ul>
+
+</div><!-- /wrap -->
+
+<script>
+function toggleStep(block, event) {
+  if (event.target.closest('pre, a, code')) return;
+  block.classList.toggle('open');
+}
+</script>
+</body>
+</html>

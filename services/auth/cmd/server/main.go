@@ -34,38 +34,38 @@ func main() {
 
 	tracerShutdown, err := obs.InitTracer(ctx, "auth-service")
 	if err != nil {
-		log.Fatalf("Failed to initialize tracer for auth-service: %v", err)
+		logger.Fatal("Failed to initialize tracer for auth-service: %v", zap.Error(err))
 	}
-	defer func(func(context.Context) error) {
+	defer func() {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		if err := tracerShutdown(shutdownCtx); err != nil {
-			logger.Error("tracer shutdown failed", zap.Error(err))
+			logger.Error("Tracer shutdown failed", zap.Error(err))
 		}
 		logger.Info("Starting tracer shutdown...")
-	}(tracerShutdown)
+	}()
 
 	tracer := otel.Tracer("auth-service")
 	ctx, span := tracer.Start(ctx, "smoke-test")
 
 	pgpool, err := postgres.NewPool(ctx, cfg.Database)
 	if err != nil {
-		log.Fatalf("Failed to create postgres pool: %v", err)
+		logger.Fatal("Failed to create postgres pool: %v", zap.Error(err))
 	}
 	defer pgpool.Close()
 
 	if err := postgres.HealthCheck(ctx, pgpool); err != nil {
-		log.Fatalf("Failed to health check postgres: %v", err)
+		logger.Fatal("Failed to health check postgres: %v", zap.Error(err))
 	}
 	logger.Info("PostgreSQL pool created and healthy")
 
 	rdb, err := redis.NewClient(ctx, cfg.Redis)
 	if err != nil {
-		log.Fatalf("Failed to connect to Redis: %v", err)
+		logger.Fatal("Failed to connect to Redis: %v", zap.Error(err))
 	}
 
 	if err := redis.HealthCheck(ctx, rdb); err != nil {
-		log.Fatalf("Failed to ping Redis: %v", err)
+		logger.Fatal("Failed to ping Redis: %v", zap.Error(err))
 	}
 
 	logger.Info("Redis client initialized successfully")
@@ -82,12 +82,12 @@ func main() {
 
 	err = producer.Publish(ctx, []byte("Hi"), []byte("Kafka Apache"))
 	if err != nil {
-		logger.Debug("Kafka producer publish failed", obs.TraceFields(ctx, zap.Error(err))...)
+		logger.Fatal("Kafka producer publish failed", obs.TraceFields(ctx, zap.Error(err))...)
 	}
 
 	msg, err := consumer.Read(ctx)
 	if err != nil {
-		logger.Debug("Kafka consumer read failed", obs.TraceFields(ctx, zap.Error(err))...)
+		logger.Fatal("Kafka consumer read failed", obs.TraceFields(ctx, zap.Error(err))...)
 	}
 	logger.Info("From Kafka got message", zap.String("value", string(msg.Value)))
 

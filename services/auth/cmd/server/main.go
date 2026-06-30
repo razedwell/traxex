@@ -5,12 +5,15 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/razedwell/traxex/shared/config"
+	"github.com/razedwell/traxex/shared/kafka"
 	"github.com/razedwell/traxex/shared/obs"
 	"github.com/razedwell/traxex/shared/postgres"
 	"github.com/razedwell/traxex/shared/redis"
 	"go.opentelemetry.io/otel"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -26,6 +29,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialized logger: %v", err)
 	}
+	defer logger.Sync()
 	logger.Info("Zap logger initialized successfully")
 
 	tracerShutdown, err := obs.InitTracer(ctx, "auth-service")
@@ -33,13 +37,16 @@ func main() {
 		log.Fatalf("Failed to initialize tracer for auth-service: %v", err)
 	}
 	defer func(func(context.Context) error) {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := tracerShutdown(shutdownCtx); err != nil {
+			logger.Error("tracer shutdown failed", zap.Error(err))
+		}
 		logger.Info("Starting tracer shutdown...")
-		tracerShutdown(context.Background())
 	}(tracerShutdown)
 
 	tracer := otel.Tracer("auth-service")
 	ctx, span := tracer.Start(ctx, "smoke-test")
-	span.End()
 
 	pgpool, err := postgres.NewPool(ctx, cfg.Database)
 	if err != nil {
@@ -62,6 +69,29 @@ func main() {
 	}
 
 	logger.Info("Redis client initialized successfully")
+
+	topic := "phase1.smoke"
+
+	producer := kafka.NewProducer(cfg.Kafka, topic)
+	defer producer.Close()
+	logger.Info("Kafka producer initialized successfully")
+
+	consumer := kafka.NewConsumer(cfg.Kafka, topic)
+	defer consumer.Close()
+	logger.Info("Kafka consumer initialized successfully")
+
+	err = producer.Publish(ctx, []byte("Hi"), []byte("Kafka Apache"))
+	if err != nil {
+		logger.Debug("Kafka producer publish failed", obs.TraceFields(ctx, zap.Error(err))...)
+	}
+
+	msg, err := consumer.Read(ctx)
+	if err != nil {
+		logger.Debug("Kafka consumer read failed", obs.TraceFields(ctx, zap.Error(err))...)
+	}
+	logger.Info("From Kafka got message", zap.String("value", string(msg.Value)))
+
+	span.End()
 
 	select {
 	case <-ctx.Done():

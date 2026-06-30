@@ -2,6 +2,7 @@ package obs
 
 import (
 	"context"
+	"fmt"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
@@ -15,6 +16,9 @@ func InitTracer(ctx context.Context, serviceName string) (shutdown func(context.
 	exporter, err := stdouttrace.New(
 		stdouttrace.WithPrettyPrint(),
 	)
+	if err != nil {
+		return nil, fmt.Errorf("Error occured during creation of exporter")
+	}
 
 	provider := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter),

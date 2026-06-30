@@ -18,13 +18,9 @@ func NewClient(ctx context.Context, cfg config.RedisConfig) (*redis.Client, erro
 	}
 	rdb := redis.NewClient(opt)
 
-	if rdb == nil {
-		return nil, fmt.Errorf("Error: Redis client is nil")
-	}
-
 	res := rdb.Ping(ctx)
 	if res.Err() != nil {
-		return nil, fmt.Errorf("Redis client ping error: %w-%v", res.Err(), res.Val())
+		return nil, fmt.Errorf("Redis client ping error: %w", res.Err())
 	}
 
 	return rdb, nil

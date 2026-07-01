@@ -67,6 +67,7 @@ func main() {
 	if err := redis.HealthCheck(ctx, rdb); err != nil {
 		logger.Fatal("Failed to ping Redis: %v", zap.Error(err))
 	}
+	defer rdb.Close()
 
 	logger.Info("Redis client initialized successfully")
 

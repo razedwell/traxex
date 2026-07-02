@@ -1,0 +1,6 @@
+package: authhttp
+generate:
+  models: true
+  std-http-server: true # generate net/http server iface (or chi-server)
+  strict-server: true # typed request/response, less boilerplate
+output: services/auth/internal/handler/authhttp/api.gen.go

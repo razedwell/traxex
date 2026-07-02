@@ -3,6 +3,9 @@ PROTO_GEN = proto/gen/go
 
 PROTO_FILES = $(shell find $(PROTO_DIR) -name '*.proto')
 
+DB_DSN ?=postgres://traxex:drowranger@localhost:5432/traxex_dev?sslmode=disable
+MIGRATIONS_DIR := services/auth/migrations
+
 .PHONY: proto
 
 generate: gen-proto gen-mocks gen-openapi
@@ -48,11 +51,17 @@ docker-build:
 	@echo "Building Docker images..."
 	docker build -t auth-service:latest -f services/auth/Dockerfile .
 
+migrate-create:
+	@echo "Creating a new migration file: $(name) ..."
+	goose -dir $(MIGRATIONS_DIR) create $(name) sql
+
 migrate-up:
-	@echo "TODO migrate-up"
+	@echo "Migrating up..."
+	goose -dir $(MIGRATIONS_DIR) postgres "$(DB_DSN)" up
 
 migrate-down:
-	@echo "TODO migrate-down"
+	@echo "Migrating down..."
+	goose -dir $(MIGRATIONS_DIR) postgres "$(DB_DSN)" down
 
 clean:
 	@echo "Deleting generated files..."

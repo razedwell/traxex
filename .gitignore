@@ -36,3 +36,7 @@ config.yaml
 #Binary artifacts
 bin/
 bin/*
+
+#Temporary files
+tmp/
+tmp/*

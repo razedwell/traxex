@@ -15,8 +15,8 @@ import (
 // SessionStore is a port over Redis so the service stays testable.
 type SessionStore interface {
 	Save(ctx context.Context, s domain.Session, ttl time.Duration) error
-	Get(ctx context.Context, refreshToken string) (domain.Session, error)
-	Delete(ctx context.Context, regreshToken string) error
+	Get(ctx context.Context, refresh string) (domain.Session, error)
+	Delete(ctx context.Context, refresh string) error
 }
 
 type AuthService struct {
@@ -61,6 +61,43 @@ func (a *AuthService) Login(ctx context.Context, email, password string) (access
 	return a.issueTokens(ctx, u.ID)
 }
 
+func (a *AuthService) ValidateToken(ctx context.Context, access string) (string, error) {
+	tok, err := jwt.Parse(access, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, domain.ErrTokenInvalid()
+		}
+		return a.jwtSecret, nil
+	})
+	if err != nil || !tok.Valid {
+		return "", domain.ErrTokenInvalid()
+	}
+
+	claims := tok.Claims.(jwt.MapClaims)
+	sub := claims["sub"].(string)
+	if sub == "" {
+		return "", domain.ErrTokenInvalid()
+	}
+	return sub, nil
+}
+
+func (a *AuthService) Refresh(ctx context.Context, refresh string) (string, string, int64, error) {
+	sesh, err := a.sessions.Get(ctx, refresh)
+	if err != nil {
+		return "", "", 0, domain.ErrTokenInvalid()
+	}
+
+	err = a.sessions.Delete(ctx, refresh)
+	if err != nil {
+		return "", "", 0, domain.ErrTokenInvalid()
+	}
+
+	return a.issueTokens(ctx, sesh.UserID)
+}
+
+func (a *AuthService) Logout(ctx context.Context, refresh string) error {
+	return a.sessions.Delete(ctx, refresh)
+}
+
 func (a *AuthService) issueTokens(ctx context.Context, userID string) (access, refresh string, expiresIn int64, err error) {
 	now := time.Now()
 	claims := jwt.MapClaims(map[string]interface{}{
@@ -68,11 +105,14 @@ func (a *AuthService) issueTokens(ctx context.Context, userID string) (access, r
 		"iat": now.Unix(),
 		"exp": now.Add(a.accessTTL).Unix(),
 	})
-	access, err = jwt.NewWithClaims(jwt.SigningMethodES256, claims).SignedString(a.jwtSecret)
+
+	access, err = jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(a.jwtSecret)
 	if err != nil {
 		return "", "", 0, traxerr.Wrap(traxerr.CodeInternal, "sign token", err)
 	}
+
 	refresh = uuid.NewString()
+
 	sesh := domain.Session{
 		UserID:       userID,
 		RefreshToken: refresh,
@@ -82,9 +122,6 @@ func (a *AuthService) issueTokens(ctx context.Context, userID string) (access, r
 	if err := a.sessions.Save(ctx, sesh, a.refreshTTL); err != nil {
 		return "", "", 0, traxerr.Wrap(traxerr.CodeInternal, "save session", err)
 	}
-	return access, refresh, int64(a.accessTTL.Seconds()), nil
-}
 
-func (a *AuthService) ValidateToken(ctx context.Context, access string) (string, error) {
-	tok, err := jwt.Parse(access)
+	return access, refresh, int64(a.accessTTL.Seconds()), nil
 }

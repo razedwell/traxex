@@ -65,5 +65,4 @@ message ValidateTokenRequest {
 
 message ValidateTokenResponse {
     string user_id = 1;
-    bool valid = 2;
 }

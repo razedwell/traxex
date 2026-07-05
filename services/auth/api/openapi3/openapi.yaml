@@ -43,6 +43,73 @@ paths:
         401:
           description: invalid credentials
 
+  /auth/logout:
+    post:
+      operationId: logout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        200:
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutResponse'
+        400:
+          description: bad request
+        404:
+          description: not found
+        500:
+          description: internal server error
+        503:
+          description: server unavailable
+    
+  /auth/validate-token:
+    post:
+      operationId: validate token
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema: 
+              $ref: '#/components/schemas/ValidateTokenRequest'
+      responses:
+        200:
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateTokenResponse'
+        401:
+          description: invalid or expired token
+        500:
+          description: internal server error
+  
+  /auth/refresh:
+    post:
+      operationId: refresh token
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema: 
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        200:
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        401:
+          description: invalid or expired token
+        500:
+          description: internal server error
+
 components: 
   schemas:
     RegisterRequest:
@@ -67,6 +134,20 @@ components:
           type: string
           minLength: 8
 
+    RefreshTokenRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+
+    ValidateTokenRequest:
+      type: object
+      required: [access_token]
+      properties:
+        access_token:
+          type: string
+
     UserResponse:
       type: object
       properties:
@@ -87,5 +168,17 @@ components:
           type: string
         expires_in:
           type: integer
+
+    LogoutResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+
+    ValidateTokenResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
         
             

@@ -7,7 +7,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/razedwell/traxex/services/auth/internal/domain"
-	"github.com/razedwell/traxex/services/auth/internal/repository"
 	"github.com/razedwell/traxex/shared/traxerr"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,8 +18,14 @@ type SessionStore interface {
 	Delete(ctx context.Context, refresh string) error
 }
 
+type UserRepository interface {
+	Create(ctx context.Context, u domain.User) (domain.User, error)
+	GetByEmail(ctx context.Context, email string) (domain.User, error)
+	GetByID(ctx context.Context, id string) (domain.User, error)
+}
+
 type AuthService struct {
-	repo       repository.UserRepository
+	repo       UserRepository
 	sessions   SessionStore
 	jwtSecret  []byte
 	accessTTL  time.Duration
@@ -28,7 +33,7 @@ type AuthService struct {
 	bcryptCost int
 }
 
-func NewAuthService(r repository.UserRepository, s SessionStore, secret []byte) *AuthService {
+func NewAuthService(r UserRepository, s SessionStore, secret []byte) *AuthService {
 	return &AuthService{
 		repo:       r,
 		sessions:   s,

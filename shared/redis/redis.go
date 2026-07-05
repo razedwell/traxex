@@ -20,7 +20,7 @@ func NewClient(ctx context.Context, cfg config.RedisConfig) (*redis.Client, erro
 
 	res := rdb.Ping(ctx)
 	if res.Err() != nil {
-		return nil, fmt.Errorf("Redis client ping error: %w", res.Err())
+		return nil, fmt.Errorf("redis client ping error: %w", res.Err())
 	}
 
 	return rdb, nil
@@ -28,8 +28,7 @@ func NewClient(ctx context.Context, cfg config.RedisConfig) (*redis.Client, erro
 
 func HealthCheck(ctx context.Context, rdb *redis.Client) error {
 	if res := rdb.Ping(ctx); res.Err() != nil {
-		res.Result()
-		return fmt.Errorf("Redis health check failed: %w-%v", res.Err(), res.Val())
+		return fmt.Errorf("redis health check failed: %w", res.Err())
 	}
 	return nil
 }

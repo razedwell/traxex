@@ -34,7 +34,7 @@ func main() {
 
 	tracerShutdown, err := obs.InitTracer(ctx, "auth-service")
 	if err != nil {
-		logger.Fatal("Failed to initialize tracer for auth-service: %v", zap.Error(err))
+		logger.Fatal("Failed to initialize tracer for auth-service", zap.Error(err))
 	}
 	defer func() {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -50,22 +50,22 @@ func main() {
 
 	pgpool, err := postgres.NewPool(ctx, cfg.Database)
 	if err != nil {
-		logger.Fatal("Failed to create postgres pool: %v", zap.Error(err))
+		logger.Fatal("Failed to create postgres pool", zap.Error(err))
 	}
 	defer pgpool.Close()
 
 	if err := postgres.HealthCheck(ctx, pgpool); err != nil {
-		logger.Fatal("Failed to health check postgres: %v", zap.Error(err))
+		logger.Fatal("Failed to health check postgres", zap.Error(err))
 	}
 	logger.Info("PostgreSQL pool created and healthy")
 
 	rdb, err := redis.NewClient(ctx, cfg.Redis)
 	if err != nil {
-		logger.Fatal("Failed to connect to Redis: %v", zap.Error(err))
+		logger.Fatal("Failed to connect to Redis", zap.Error(err))
 	}
 
 	if err := redis.HealthCheck(ctx, rdb); err != nil {
-		logger.Fatal("Failed to ping Redis: %v", zap.Error(err))
+		logger.Fatal("Failed to ping Redis", zap.Error(err))
 	}
 	defer rdb.Close()
 

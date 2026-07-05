@@ -32,8 +32,6 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	ImageTag     string `mapstructure:"image_tag"`
-	Name         string `mapstructure:"name"`
 	User         string `mapstructure:"user"`
 	Password     string `mapstructure:"password"`
 	Database     string `mapstructure:"database"`
@@ -69,7 +67,7 @@ func LoadConfig(path string) (*Config, error) {
 	if err := v.ReadInConfig(); err != nil {
 		// It's OK if config.yaml doesn't exist (use defaults)
 		if !strings.Contains(err.Error(), "not found") {
-			return nil, fmt.Errorf("failed to read config.yaml: %v", err)
+			return nil, fmt.Errorf("failed to read config.yaml: %w", err)
 		}
 	}
 
@@ -94,11 +92,11 @@ func LoadConfig(path string) (*Config, error) {
 
 	var cfg Config
 	if err := v.Unmarshal(&cfg); err != nil {
-		return nil, fmt.Errorf("failed to unmarshall config: %v\n", err)
+		return nil, fmt.Errorf("failed to unmarshall config: %w", err)
 	}
 
 	if err := cfg.Validate(); err != nil {
-		return nil, fmt.Errorf("Validation failed for cfg: %v\n", err)
+		return nil, fmt.Errorf("validation failed for cfg: %w", err)
 	}
 
 	return &cfg, nil
@@ -106,31 +104,31 @@ func LoadConfig(path string) (*Config, error) {
 
 func (c *Config) Validate() error {
 	if c.Database.Password == "" {
-		return fmt.Errorf("Database password cannot be empty")
+		return fmt.Errorf("database password cannot be empty")
 	}
 
 	if c.Database.PoolMaxConns == 0 {
-		return fmt.Errorf("Database pool max connections must be greater than 0")
+		return fmt.Errorf("database pool max connections must be greater than 0")
 	}
 
 	if c.Database.Port == 0 {
-		return fmt.Errorf("Database port cannot be 0")
+		return fmt.Errorf("database port cannot be 0")
 	}
 
 	if c.Server.Port < 1 || c.Server.Port > 65535 {
-		return fmt.Errorf("Server port must be between 1 and 65535")
+		return fmt.Errorf("server port must be between 1 and 65535")
 	}
 
 	if c.Redis.DB < 0 || c.Redis.DB > 15 {
-		return fmt.Errorf("Redis DB must be between 0 and 15")
+		return fmt.Errorf("redis DB must be between 0 and 15")
 	}
 
 	if c.Redis.Port == 0 {
-		return fmt.Errorf("Redis port cannot be 0")
+		return fmt.Errorf("redis port cannot be 0")
 	}
 
 	if c.Redis.PoolSize == 0 {
-		return fmt.Errorf("Redis pool size must be greater than 0")
+		return fmt.Errorf("redis pool size must be greater than 0")
 	}
 
 	return nil

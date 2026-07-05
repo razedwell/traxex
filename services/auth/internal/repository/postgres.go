@@ -24,7 +24,7 @@ func (r PostgresUserRepo) Create(ctx context.Context, u domain.User) (domain.Use
 	err := r.pool.QueryRow(ctx, q, u.Email, u.PasswordHash).Scan(&u.ID, &u.CreatedAt)
 	if err != nil {
 		var pgErr *pgconn.PgError
-		if errors.As(err, pgErr) && pgErr.Code == "23505" {
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return domain.User{}, domain.ErrEmailTaken()
 		}
 		return domain.User{}, fmt.Errorf("create user: %w", err)

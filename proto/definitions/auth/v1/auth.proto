@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package auth.v1;
 
-option go_package = "github.com/razedwell/traxex/proto/gen/auth/v1;authv1";
+option go_package = "github.com/razedwell/traxex/proto/gen/go/auth/v1;authv1";
 
 import "google/protobuf/timestamp.proto";
 
@@ -18,7 +18,7 @@ service AuthService {
 message User {
     string id = 1;
     string email = 2;
-    google.protobuf.Timestamp createdAt = 3;
+    google.protobuf.Timestamp created_at = 3;
 }
 
 message RegisterRequest {

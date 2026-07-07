@@ -77,15 +77,20 @@ func (a *AuthService) ValidateToken(ctx context.Context, access string) (string,
 		return "", domain.ErrTokenInvalid()
 	}
 
-	claims := tok.Claims.(jwt.MapClaims)
-	sub := claims["sub"].(string)
-	if sub == "" {
+	claims, ok := tok.Claims.(jwt.MapClaims)
+	if !ok {
 		return "", domain.ErrTokenInvalid()
 	}
+
+	sub, ok := claims["sub"].(string)
+	if sub == "" || !ok {
+		return "", domain.ErrTokenInvalid()
+	}
+
 	return sub, nil
 }
 
-func (a *AuthService) Refresh(ctx context.Context, refresh string) (string, string, int64, error) {
+func (a *AuthService) RefreshToken(ctx context.Context, refresh string) (string, string, int64, error) {
 	sesh, err := a.sessions.Get(ctx, refresh)
 	if err != nil {
 		return "", "", 0, domain.ErrTokenInvalid()

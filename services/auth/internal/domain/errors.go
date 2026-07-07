@@ -17,3 +17,7 @@ func ErrUserNotFound() error {
 func ErrTokenInvalid() error {
 	return traxerr.New(traxerr.CodeUnauthorized, "token invalid or expired")
 }
+
+func ErrSessionNotFound() error {
+	return traxerr.New(traxerr.CodeSessionNotFound, "session not found")
+}

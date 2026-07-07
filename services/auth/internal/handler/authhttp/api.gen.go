@@ -41,7 +41,7 @@ type RegisterRequest struct {
 // TokenResponse defines model for TokenResponse.
 type TokenResponse struct {
 	AccessToken  *string `json:"access_token,omitempty"`
-	ExpiresIn    *int    `json:"expires_in,omitempty"`
+	ExpiresIn    *int64  `json:"expires_in,omitempty"`
 	RefreshToken *string `json:"refresh_token,omitempty"`
 }
 
@@ -356,19 +356,11 @@ func (response Logout200JSONResponse) VisitLogoutResponse(w http.ResponseWriter)
 	return err
 }
 
-type Logout400Response struct {
+type Logout204Response struct {
 }
 
-func (response Logout400Response) VisitLogoutResponse(w http.ResponseWriter) error {
-	w.WriteHeader(400)
-	return nil
-}
-
-type Logout404Response struct {
-}
-
-func (response Logout404Response) VisitLogoutResponse(w http.ResponseWriter) error {
-	w.WriteHeader(404)
+func (response Logout204Response) VisitLogoutResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
 	return nil
 }
 
@@ -377,14 +369,6 @@ type Logout500Response struct {
 
 func (response Logout500Response) VisitLogoutResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-	return nil
-}
-
-type Logout503Response struct {
-}
-
-func (response Logout503Response) VisitLogoutResponse(w http.ResponseWriter) error {
-	w.WriteHeader(503)
 	return nil
 }
 

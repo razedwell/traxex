@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	authv1 "github.com/razedwell/traxex/proto/gen/go/auth/v1"
+	"github.com/razedwell/traxex/services/auth/internal/service"
 	"github.com/razedwell/traxex/shared/traxerr"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -16,10 +17,18 @@ type GRPCHandler struct {
 	svc AuthUseCase
 }
 
+// compile-time checks
+var _ AuthUseCase = (*service.AuthService)(nil)
+var _ authv1.AuthServiceServer = (*GRPCHandler)(nil)
+
+func NewGRPCHandler(svc AuthUseCase) *GRPCHandler {
+	return &GRPCHandler{svc: svc}
+}
+
 func (h *GRPCHandler) Register(ctx context.Context, req *authv1.RegisterRequest) (*authv1.RegisterResponse, error) {
 	u, err := h.svc.Register(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
-		return nil, toStatus(err)
+		return nil, toGRPCStatus(err)
 	}
 	return &authv1.RegisterResponse{
 		User: &authv1.User{
@@ -32,7 +41,7 @@ func (h *GRPCHandler) Register(ctx context.Context, req *authv1.RegisterRequest)
 func (h *GRPCHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.LoginResponse, error) {
 	access, refresh, exp, err := h.svc.Login(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
-		return nil, toStatus(err)
+		return nil, toGRPCStatus(err)
 	}
 	return &authv1.LoginResponse{
 		AccessToken:  access,
@@ -44,7 +53,7 @@ func (h *GRPCHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 func (h *GRPCHandler) Logout(ctx context.Context, req *authv1.LogoutRequest) (*authv1.LogoutResponse, error) {
 	err := h.svc.Logout(ctx, req.GetRefreshToken())
 	if err != nil {
-		return &authv1.LogoutResponse{Success: false}, toStatus(err)
+		return &authv1.LogoutResponse{Success: false}, toGRPCStatus(err)
 	}
 	return &authv1.LogoutResponse{Success: true}, nil
 }
@@ -52,7 +61,7 @@ func (h *GRPCHandler) Logout(ctx context.Context, req *authv1.LogoutRequest) (*a
 func (h *GRPCHandler) ValidateToken(ctx context.Context, req *authv1.ValidateTokenRequest) (*authv1.ValidateTokenResponse, error) {
 	userID, err := h.svc.ValidateToken(ctx, req.GetAccessToken())
 	if err != nil {
-		return nil, toStatus(err)
+		return nil, toGRPCStatus(err)
 	}
 	return &authv1.ValidateTokenResponse{
 		UserId: userID,
@@ -62,7 +71,7 @@ func (h *GRPCHandler) ValidateToken(ctx context.Context, req *authv1.ValidateTok
 func (h *GRPCHandler) RefreshToken(ctx context.Context, req *authv1.RefreshTokenRequest) (*authv1.RefreshTokenResponse, error) {
 	access, refresh, exp, err := h.svc.RefreshToken(ctx, req.GetRefreshToken())
 	if err != nil {
-		return nil, toStatus(err)
+		return nil, toGRPCStatus(err)
 	}
 	return &authv1.RefreshTokenResponse{
 		AccessToken:  access,
@@ -72,7 +81,7 @@ func (h *GRPCHandler) RefreshToken(ctx context.Context, req *authv1.RefreshToken
 }
 
 // transforms an error into a gRPC Status (error/failure).
-func toStatus(e error) error {
+func toGRPCStatus(e error) error {
 	var te *traxerr.Traxerr
 	if errors.As(e, &te) {
 		return status.Error(traxerr.GRPCCode(te.Code), te.Message)

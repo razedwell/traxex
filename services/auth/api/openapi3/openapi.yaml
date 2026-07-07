@@ -59,14 +59,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LogoutResponse'
-        400:
-          description: bad request
-        404:
-          description: not found
+        204:
+          description: no content
         500:
           description: internal server error
-        503:
-          description: server unavailable
     
   /auth/validate-token:
     post:
@@ -168,6 +164,7 @@ components:
           type: string
         expires_in:
           type: integer
+          format: int64
 
     LogoutResponse:
       type: object

@@ -62,9 +62,14 @@ func (s *RedisSessionStore) Get(ctx context.Context, refresh string) (domain.Ses
 
 func (s *RedisSessionStore) Delete(ctx context.Context, refresh string) error {
 	seshKey := sessionKey(refresh)
-	err := s.rdb.Del(ctx, seshKey).Err()
-	if err != nil {
-		return fmt.Errorf("redis delete err: %w", err)
+	res := s.rdb.Del(ctx, seshKey)
+	if err := res.Err(); err != nil {
+		return fmt.Errorf("redis session delete err: %w", err)
 	}
+
+	if res.Val() == 0 {
+		return domain.ErrSessionNotFound()
+	}
+
 	return nil
 }

@@ -11,6 +11,8 @@ type HTTPHandler struct {
 	svc handler.AuthUseCase
 }
 
+var _ StrictServerInterface = (*HTTPHandler)(nil)
+
 func NewHandler(svc handler.AuthUseCase) *HTTPHandler {
 	return &HTTPHandler{svc: svc}
 }
@@ -57,5 +59,41 @@ func (h *HTTPHandler) Logout(ctx context.Context, req LogoutRequestObject) (Logo
 	success = true
 	return Logout200JSONResponse{
 		Success: &success,
+	}, nil
+}
+
+func (h *HTTPHandler) ValidateToken(ctx context.Context, req ValidateTokenRequestObject) (ValidateTokenResponseObject, error) {
+	userId, err := h.svc.ValidateToken(ctx, req.Body.AccessToken)
+	if err != nil {
+		if traxerr.IsCode(err, traxerr.CodeUnauthorized) {
+			return ValidateToken401Response{}, nil
+		}
+		return nil, err
+	}
+
+	if userId == "" {
+		return nil, traxerr.New(traxerr.CodeInternal, "validate token invalid userId")
+	}
+
+	return ValidateToken200JSONResponse{
+		UserId: &userId,
+	}, nil
+}
+
+func (h *HTTPHandler) RefreshToken(ctx context.Context, req RefreshTokenRequestObject) (RefreshTokenResponseObject, error) {
+	access, refresh, exp, err := h.svc.RefreshToken(ctx, req.Body.RefreshToken)
+	if err != nil {
+		if traxerr.IsCode(err, traxerr.CodeUnauthorized) {
+			return RefreshToken401Response{}, nil
+		}
+		return nil, err
+	}
+	if access == "" || refresh == "" || exp == 0 {
+		return nil, traxerr.New(traxerr.CodeInternal, "refresh token invalid tokens")
+	}
+	return RefreshToken200JSONResponse{
+		AccessToken:  &access,
+		RefreshToken: &refresh,
+		ExpiresIn:    &exp,
 	}, nil
 }

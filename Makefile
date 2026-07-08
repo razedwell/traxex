@@ -74,6 +74,7 @@ deps:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+	go install github.com/vektra/mockery/v2@latest
 	@echo "Dependencies installed successfully."
 
 lint:

@@ -1,0 +1,11 @@
+with-expecter: true
+resolve-type-alias: false
+disable-version-string: true
+issue-845-fix: true
+dir: services/auth/internal/mocks
+outpkg: mocks
+packages:
+  github.com/razedwell/traxex/services/auth/internal/service:
+    interfaces:
+      UserRepository:
+      SessionStore:

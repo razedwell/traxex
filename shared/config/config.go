@@ -15,6 +15,7 @@ type Config struct {
 	Redis    RedisConfig    `mapstructure:"redis"`
 	Kafka    KafkaConfig    `mapstructure:"kafka"`
 	Logging  LoggingConfig  `mapstructure:"logging"`
+	Auth     AuthConfig     `mapstructure:"auth"`
 }
 type KafkaConfig struct {
 	Brokers           []string `mapstructure:"brokers"`
@@ -49,6 +50,11 @@ type RedisConfig struct {
 	PoolSize int    `mapstructure:"pool_size"`
 }
 
+type AuthConfig struct {
+	JWTSecret string `mapstructure:"jwt_secret"`
+	GRPCPort  int    `mapstructure:"grpc_port"`
+}
+
 func LoadConfig(path string) (*Config, error) {
 	v := viper.New()
 	// 1. Set defaults from code
@@ -60,6 +66,7 @@ func LoadConfig(path string) (*Config, error) {
 	v.SetDefault("redis.host", "localhost")
 	v.SetDefault("redis.port", 6379)
 	v.SetDefault("redis.pool_size", 10)
+	v.SetDefault("auth.grpc_port", 9090)
 	// 2. Load from config.yaml (development base)
 	v.AddConfigPath(path)
 	v.SetConfigName("config")
@@ -129,6 +136,14 @@ func (c *Config) Validate() error {
 
 	if c.Redis.PoolSize == 0 {
 		return fmt.Errorf("redis pool size must be greater than 0")
+	}
+
+	if c.Auth.GRPCPort < 1 || c.Auth.GRPCPort > 65535 {
+		return fmt.Errorf("auth grpc port must be between 1 and 65535")
+	}
+
+	if c.Auth.JWTSecret == "" {
+		return fmt.Errorf("auth jwt secret cannot be empty")
 	}
 
 	return nil

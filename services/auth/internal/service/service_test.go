@@ -31,6 +31,24 @@ func TestLogin(t *testing.T) {
 				s.EXPECT().Save(mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			},
 		},
+		{
+			name: "fail",
+			pswd: "wrong pswd",
+			setup: func(r *mocks.MockUserRepository, s *mocks.MockSessionStore) {
+				r.EXPECT().GetByEmail(mock.Anything, "a@b.cd").
+					Return(domain.User{ID: "u2", PasswordHash: string(hash)}, nil)
+			},
+			wantErr: traxerr.CodeUnauthorized,
+		},
+		{
+			name: "unknown email returns the SAME unauthorized (enumeration defense)",
+			pswd: "whatever",
+			setup: func(r *mocks.MockUserRepository, s *mocks.MockSessionStore) {
+				r.EXPECT().GetByEmail(mock.Anything, "a@b.cd").
+					Return(domain.User{}, domain.ErrUserNotFound())
+			},
+			wantErr: traxerr.CodeUnauthorized,
+		},
 	}
 
 	for _, tt := range tests {

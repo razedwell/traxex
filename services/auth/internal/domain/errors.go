@@ -1,6 +1,8 @@
 package domain
 
-import "github.com/razedwell/traxex/shared/traxerr"
+import (
+	"github.com/razedwell/traxex/shared/traxerr"
+)
 
 func ErrEmailTaken() error {
 	return traxerr.New(traxerr.CodeConflict, "email already registered")

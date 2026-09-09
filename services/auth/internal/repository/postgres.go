@@ -46,7 +46,7 @@ func (r *PostgresUserRepo) GetByEmail(ctx context.Context, email string) (domain
 }
 
 func (r *PostgresUserRepo) GetByID(ctx context.Context, id string) (domain.User, error) {
-	const q = `SELCET id, email, password_hash, created_at FROM users WHERE id = $1`
+	const q = `SELECT id, email, password_hash, created_at FROM users WHERE id = $1`
 	var u domain.User
 	err := r.pool.QueryRow(ctx, q, id).Scan(&u.ID, &u.Email, &u.PasswordHash, &u.CreatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {

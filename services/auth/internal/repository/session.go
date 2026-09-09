@@ -67,9 +67,5 @@ func (s *RedisSessionStore) Delete(ctx context.Context, refresh string) error {
 		return fmt.Errorf("redis session delete err: %w", err)
 	}
 
-	if res.Val() == 0 {
-		return domain.ErrSessionNotFound()
-	}
-
 	return nil
 }

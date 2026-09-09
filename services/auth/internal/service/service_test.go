@@ -156,3 +156,45 @@ func TestRefreshToken(t *testing.T) {
 		})
 	}
 }
+
+func TetsValidateToken(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   string
+		setup   func(r *mocks.MockUserRepository, s *mocks.MockSessionStore)
+		wantErr traxerr.Code
+	}{
+		{
+			name:  "valid",
+			input: "valid token",
+			setup: func(r *mocks.MockUserRepository, s *mocks.MockSessionStore) {
+				s.EXPECT().Get(mock.Anything, mock.Anything).
+					Return(domain.Session{UserID: "u1", RefreshToken: "valid token", CreatedAt: time.Now(), ExpiresAt: time.Now().Add(15 * time.Minute)}, nil)
+			},
+			wantErr: "",
+		},
+		{
+			name:  "invalid",
+			input: "invalid token",
+			setup: func(r *mocks.MockUserRepository, s *mocks.MockSessionStore) {
+				s.EXPECT().Get(mock.Anything, mock.Anything).
+					Return(domain.Session{}, domain.ErrTokenInvalid())
+			},
+			wantErr: traxerr.CodeUnauthorized,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo, sesh := mocks.NewMockUserRepository(t), mocks.NewMockSessionStore(t)
+			tt.setup(repo, sesh)
+			svc := NewAuthService(repo, sesh, []byte("test-secret"))
+			_, err := svc.ValidateToken(context.Background(), mock.Anything)
+
+			if tt.wantErr != "" {
+				require.True(t, traxerr.IsCode(err, traxerr.CodeUnauthorized), "got %v: ", err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}

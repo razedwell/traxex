@@ -40,3 +40,7 @@ bin/*
 #Temporary files
 tmp/
 tmp/*
+
+#Claude files
+.claude/
+.claude/*
